@@ -22,3 +22,27 @@ flutter pub add firebase_core
 flutter pub add firebase_auth
 flutter pub add cloud_firestore
 ```
+
+# Clone Project
+
+```
+git clone https://github.com/MSN42000/rosca-app.git
+```
+
+# Pull repository
+
+```
+git pull
+```
+
+# Create new branch
+
+```
+git checkout -b features/name_of_feature
+```
+
+# Push current branch
+
+```
+git push -u origin features/name_of_feature
+```
