@@ -46,3 +46,16 @@ git checkout -b features/name_of_feature
 ```
 git push -u origin features/name_of_feature
 ```
+
+## Pull Request Template
+
+```
+## Description
+Brief description of changes
+
+## Type of Change
+- [ ] Bug fix
+- [ ] New feature
+- [ ] Breaking change
+- [ ] Documentation update
+```
