@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "758970889472",
+    "project_id": "rosca-app-cb1cc",
+    "storage_bucket": "rosca-app-cb1cc.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:758970889472:android:9cf83340d7fb0ce7d96fe5",
+        "android_client_info": {
+          "package_name": "com.example.roscaapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDfedovl9wClaWU2Fdi1kSzz-_2vselsjo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
