@@ -362,13 +362,13 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
 
     try {
       final memberIds = group.members.map((m) => m.userId).toList();
-
-      await _contributionService.createRoundContributionsForGroup(
-        groupId: group.id,
-        memberIds: memberIds,
-        amount: group.monthlyAmount,
-        roundNumber: group.currentRound,
-      );
+//
+      //await _contributionService.createRoundContributionsForGroup(
+        groupId: //group.id,
+        memberIds: //memberIds,
+        amount: //group.monthlyAmount,
+        roundNumber:// group.currentRound,
+      //);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

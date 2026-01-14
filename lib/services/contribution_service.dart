@@ -13,17 +13,25 @@ class ContributionService {
   /// Créer une nouvelle contribution
   Future<String> createContribution({
     required String userId,
+    required String userName,
     required String groupId,
+    required String groupName,
     required double amount,
     required int roundNumber,
+    DateTime? dueDate,
   }) async {
     final docRef = await _db.collection('contributions').add({
       'userId': userId,
+      'userName': userName,
       'groupId': groupId,
+      'groupName': groupName,
       'amount': amount,
       'roundNumber': roundNumber,
       'status': 'pending',
       'paidAt': null,
+      'dueDate': dueDate != null ? Timestamp.fromDate(dueDate) : null,
+      'approvedBy': null,
+      'approvedAt': null,
     });
     return docRef.id;
   }
@@ -68,6 +76,30 @@ class ContributionService {
     });
   }
 
+  /// Approuver une contribution (par un admin)
+  Future<void> approveContribution({
+    required String contributionId,
+    required String approvedByUserId,
+  }) async {
+    await _db.collection('contributions').doc(contributionId).update({
+      'status': 'approved',
+      'approvedBy': approvedByUserId,
+      'approvedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  /// Rejeter une contribution
+  Future<void> rejectContribution({
+    required String contributionId,
+    required String rejectedByUserId,
+  }) async {
+    await _db.collection('contributions').doc(contributionId).update({
+      'status': 'rejected',
+      'approvedBy': rejectedByUserId,
+      'approvedAt': FieldValue.serverTimestamp(),
+    });
+  }
+
   /// Mettre à jour le statut
   Future<void> updateStatus({
     required String contributionId,
@@ -106,7 +138,7 @@ class ContributionService {
           .map((doc) => ContributionModel.fromFirestore(doc))
           .toList();
 
-      // Trier côté client au lieu de Firestore
+      // Trier côté client
       docs.sort((a, b) => b.roundNumber.compareTo(a.roundNumber));
       return docs;
     });
@@ -119,6 +151,20 @@ class ContributionService {
         .collection('contributions')
         .where('userId', isEqualTo: userId)
         .where('status', isEqualTo: 'pending')
+        .get();
+
+    return snapshot.docs
+        .map((doc) => ContributionModel.fromFirestore(doc))
+        .toList();
+  }
+
+  /// Récupérer les contributions payées mais non approuvées d'un utilisateur
+  Future<List<ContributionModel>> getUserPaidNotApprovedContributions(
+      String userId) async {
+    final snapshot = await _db
+        .collection('contributions')
+        .where('userId', isEqualTo: userId)
+        .where('status', isEqualTo: 'paid')
         .get();
 
     return snapshot.docs
@@ -172,6 +218,34 @@ class ContributionService {
         .toList();
   }
 
+  /// Récupérer les contributions en attente d'approbation pour un groupe
+  Future<List<ContributionModel>> getGroupPaidContributions(
+      String groupId) async {
+    final snapshot = await _db
+        .collection('contributions')
+        .where('groupId', isEqualTo: groupId)
+        .where('status', isEqualTo: 'paid')
+        .get();
+
+    return snapshot.docs
+        .map((doc) => ContributionModel.fromFirestore(doc))
+        .toList();
+  }
+
+  /// Stream des contributions en attente d'approbation
+  Stream<List<ContributionModel>> getGroupPaidContributionsStream(
+      String groupId) {
+    return _db
+        .collection('contributions')
+        .where('groupId', isEqualTo: groupId)
+        .where('status', isEqualTo: 'paid')
+        .snapshots()
+        .map((snapshot) =>
+        snapshot.docs
+            .map((doc) => ContributionModel.fromFirestore(doc))
+            .toList());
+  }
+
   // =====================================================
   // STATISTIQUES
   // =====================================================
@@ -180,7 +254,7 @@ class ContributionService {
   Future<double> getUserTotalContributions(String userId) async {
     final contributions = await getUserContributions(userId);
     return contributions
-        .where((c) => c.isPaid)
+        .where((c) => c.isApproved)
         .fold<double>(0.0, (sum, c) => sum + c.amount);
   }
 
@@ -188,30 +262,61 @@ class ContributionService {
   Future<double> getGroupTotalContributions(String groupId) async {
     final contributions = await getGroupContributions(groupId);
     return contributions
-        .where((c) => c.isPaid)
+        .where((c) => c.isApproved)
         .fold<double>(0.0, (sum, c) => sum + c.amount);
+  }
+
+  /// Compter les contributions par statut pour un utilisateur
+  Future<Map<String, int>> getUserContributionsCountByStatus(
+      String userId) async {
+    final contributions = await getUserContributions(userId);
+    return {
+      'pending': contributions.where((c) => c.isPending).length,
+      'paid': contributions.where((c) => c.isPaid).length,
+      'approved': contributions.where((c) => c.isApproved).length,
+      'rejected': contributions.where((c) => c.isRejected).length,
+    };
+  }
+
+  /// Compter les contributions par statut pour un groupe
+  Future<Map<String, int>> getGroupContributionsCountByStatus(
+      String groupId) async {
+    final contributions = await getGroupContributions(groupId);
+    return {
+      'pending': contributions.where((c) => c.isPending).length,
+      'paid': contributions.where((c) => c.isPaid).length,
+      'approved': contributions.where((c) => c.isApproved).length,
+      'rejected': contributions.where((c) => c.isRejected).length,
+    };
   }
 
   /// Créer des contributions pour tous les membres d'un groupe
   Future<void> createRoundContributionsForGroup({
     required String groupId,
-    required List<String> memberIds,
+    required String groupName,
+    required Map<String, String> memberIdsAndNames, // userId: userName
     required double amount,
     required int roundNumber,
+    DateTime? dueDate,
   }) async {
     final batch = _db.batch();
 
-    for (String memberId in memberIds) {
+    memberIdsAndNames.forEach((memberId, memberName) {
       final docRef = _db.collection('contributions').doc();
       batch.set(docRef, {
         'userId': memberId,
+        'userName': memberName,
         'groupId': groupId,
+        'groupName': groupName,
         'amount': amount,
         'roundNumber': roundNumber,
         'status': 'pending',
         'paidAt': null,
+        'dueDate': dueDate != null ? Timestamp.fromDate(dueDate) : null,
+        'approvedBy': null,
+        'approvedAt': null,
       });
-    }
+    });
 
     await batch.commit();
   }
@@ -220,5 +325,11 @@ class ContributionService {
   Future<int> getTotalContributionsCount() async {
     final snapshot = await _db.collection('contributions').count().get();
     return snapshot.count ?? 0;
+  }
+
+  /// Récupérer les contributions en retard
+  Future<List<ContributionModel>> getOverdueContributions(String userId) async {
+    final contributions = await getUserContributions(userId);
+    return contributions.where((c) => c.isOverdue).toList();
   }
 }

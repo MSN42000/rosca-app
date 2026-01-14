@@ -3,7 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 // ===================================================================
-// Member Model (SIMPLIFIÉ)
+// Member Model
 // ===================================================================
 
 class GroupMember {
@@ -65,7 +65,7 @@ class GroupMember {
 }
 
 // ===================================================================
-// Group Model (SIMPLIFIÉ)
+// Group Model
 // ===================================================================
 
 class GroupModel {
