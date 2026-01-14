@@ -1,4 +1,9 @@
 import 'package:flutter/material.dart';
+import '../../theme/app_theme.dart';
+import '../../theme/app_spacing.dart';
+import '../../theme/app_text_style.dart';
+import '../../widgets/custom_button.dart';
+import '../../widgets/custom_appbar.dart';
 import '../../services/auth_service.dart';
 import 'login_screen.dart';
 
@@ -8,7 +13,6 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  // Controllers pour les champs de formulaire
   final TextEditingController nameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController phoneController = TextEditingController();
@@ -22,27 +26,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
   bool _obscurePassword = true;
   bool _obscureConfirmPassword = true;
 
-  /// Valide et enregistre un nouveau compte utilisateur
   void register() async {
-    // Valider le formulaire
-    if (!_formKey.currentState!.validate()) {
-      return;
-    }
-
-    // Vérifier que les mots de passe correspondent
+    if (!_formKey.currentState!.validate()) return;
     if (passwordController.text.trim() != confirmPasswordController.text.trim()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Les mots de passe ne correspondent pas'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
         ),
       );
       return;
     }
 
-    setState(() {
-      _isLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
       final user = await _authService.register(
@@ -55,42 +51,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
       );
 
       if (user != null) {
-        // Afficher un message de succès
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Compte créé avec succès ! Bienvenue ${nameController.text.trim()}'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
             duration: Duration(seconds: 2),
           ),
         );
-
-        // Rediriger vers l'écran de connexion
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => LoginScreen()),
         );
       }
     } catch (e) {
-      // Afficher le message d'erreur
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Erreur lors de l\'enregistrement: ${e.toString()}'),
-          backgroundColor: Colors.red,
+          backgroundColor: AppColors.error,
           duration: Duration(seconds: 3),
         ),
       );
     } finally {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
   }
 
   @override
   void dispose() {
-    // Nettoyer les controllers
     nameController.dispose();
     emailController.dispose();
     phoneController.dispose();
@@ -102,225 +89,135 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Créer un compte'),
-        centerTitle: true,
-      ),
+      appBar: CustomAppBar(title: 'Créer un compte', centerTitle: true),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.all(AppSpacing.lg),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                // Logo ou icône
+                Icon(
+                  Icons.person_add_alt_1,
+                  size: 100,
+                  color: AppColors.primary,
+                ),
+                SizedBox(height: AppSpacing.lg),
+
                 // Titre et sous-titre
                 Text(
                   'Inscription',
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: TextStyles.h1,
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 8),
+                SizedBox(height: AppSpacing.sm),
                 Text(
                   'Créez votre compte pour commencer',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyles.bodyM.copyWith(color: AppColors.textSecondary),
                   textAlign: TextAlign.center,
                 ),
-                SizedBox(height: 30),
+                SizedBox(height: AppSpacing.xl),
 
-                // Champ Nom complet
-                TextFormField(
+                // Champs du formulaire
+                _buildTextField(
                   controller: nameController,
-                  decoration: InputDecoration(
-                    labelText: 'Nom complet',
-                    hintText: 'Ex: Jean Dupont',
-                    prefixIcon: Icon(Icons.person),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  textCapitalization: TextCapitalization.words,
+                  label: 'Nom complet',
+                  hint: 'Ex: Jean Dupont',
+                  icon: Icons.person,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Veuillez entrer votre nom';
-                    }
-                    if (value.trim().length < 2) {
-                      return 'Le nom doit contenir au moins 2 caractères';
-                    }
+                    if (value == null || value.trim().isEmpty) return 'Veuillez entrer votre nom';
+                    if (value.trim().length < 2) return 'Le nom doit contenir au moins 2 caractères';
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
-
-                // Champ Email
-                TextFormField(
+                SizedBox(height: AppSpacing.md),
+                _buildTextField(
                   controller: emailController,
-                  decoration: InputDecoration(
-                    labelText: 'Email',
-                    hintText: 'exemple@email.com',
-                    prefixIcon: Icon(Icons.email),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+                  label: 'Email',
+                  hint: 'exemple@email.com',
+                  icon: Icons.email,
                   keyboardType: TextInputType.emailAddress,
                   validator: (value) {
-                    if (value == null || value.trim().isEmpty) {
-                      return 'Veuillez entrer votre email';
-                    }
-                    // Validation basique de l'email
-                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
-                        .hasMatch(value.trim())) {
-                      return 'Veuillez entrer un email valide';
-                    }
+                    if (value == null || value.trim().isEmpty) return 'Veuillez entrer votre email';
+                    if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) return 'Email invalide';
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
-
-                // Champ Téléphone (optionnel)
-                TextFormField(
+                SizedBox(height: AppSpacing.md),
+                _buildTextField(
                   controller: phoneController,
-                  decoration: InputDecoration(
-                    labelText: 'Téléphone (optionnel)',
-                    hintText: '+212 6 00 00 00 00',
-                    prefixIcon: Icon(Icons.phone),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+                  label: 'Téléphone (optionnel)',
+                  hint: '+212 6 00 00 00 00',
+                  icon: Icons.phone,
                   keyboardType: TextInputType.phone,
                   validator: (value) {
-                    // Validation optionnelle
-                    if (value != null && value.trim().isNotEmpty) {
-                      if (value.trim().length < 10) {
-                        return 'Numéro de téléphone invalide';
-                      }
-                    }
+                    if (value != null && value.trim().isNotEmpty && value.trim().length < 10)
+                      return 'Numéro de téléphone invalide';
                     return null;
                   },
                 ),
-                SizedBox(height: 16),
-
-                // Champ Mot de passe
-                TextFormField(
+                SizedBox(height: AppSpacing.md),
+                _buildTextField(
                   controller: passwordController,
-                  decoration: InputDecoration(
-                    labelText: 'Mot de passe',
-                    hintText: 'Minimum 6 caractères',
-                    prefixIcon: Icon(Icons.lock),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
+                  label: 'Mot de passe',
+                  hint: 'Minimum 6 caractères',
+                  icon: Icons.lock,
                   obscureText: _obscurePassword,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez entrer un mot de passe';
-                    }
-                    if (value.length < 6) {
-                      return 'Le mot de passe doit contenir au moins 6 caractères';
-                    }
-                    return null;
-                  },
-                ),
-                SizedBox(height: 16),
-
-                // Champ Confirmer mot de passe
-                TextFormField(
-                  controller: confirmPasswordController,
-                  decoration: InputDecoration(
-                    labelText: 'Confirmer le mot de passe',
-                    hintText: 'Retapez votre mot de passe',
-                    prefixIcon: Icon(Icons.lock_outline),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscureConfirmPassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscureConfirmPassword = !_obscureConfirmPassword;
-                        });
-                      },
-                    ),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                   ),
-                  obscureText: _obscureConfirmPassword,
                   validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Veuillez confirmer votre mot de passe';
-                    }
+                    if (value == null || value.isEmpty) return 'Veuillez entrer un mot de passe';
+                    if (value.length < 6) return 'Le mot de passe doit contenir au moins 6 caractères';
                     return null;
                   },
                 ),
-                SizedBox(height: 24),
+                SizedBox(height: AppSpacing.md),
+                _buildTextField(
+                  controller: confirmPasswordController,
+                  label: 'Confirmer le mot de passe',
+                  hint: 'Retapez votre mot de passe',
+                  icon: Icons.lock_outline,
+                  obscureText: _obscureConfirmPassword,
+                  suffixIcon: IconButton(
+                    icon: Icon(_obscureConfirmPassword ? Icons.visibility_off : Icons.visibility),
+                    onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) return 'Veuillez confirmer votre mot de passe';
+                    return null;
+                  },
+                ),
+                SizedBox(height: AppSpacing.lg),
 
                 // Bouton S'inscrire
-                ElevatedButton(
-                  onPressed: _isLoading ? null : register,
-                  style: ElevatedButton.styleFrom(
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                  child: _isLoading
-                      ? SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                      : Text(
-                    'S\'inscrire',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
+                CustomButton(
+                  text: 'S\'inscrire',
+                  onPressed: register,
+                  isLoading: _isLoading,
+                  padding: EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.xxl),
+                  type: ButtonType.primary,
                 ),
-                SizedBox(height: 16),
+                SizedBox(height: AppSpacing.md),
 
-                // Lien vers la page de connexion
+                // Lien vers la connexion
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Déjà un compte ? ',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                    TextButton(
-                      onPressed: _isLoading
-                          ? null
-                          : () {
+                    Text('Déjà un compte ? ', style: TextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
+                    CustomTextButton(
+                      text: 'Connectez-vous',
+                      onPressed: () {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(builder: (_) => LoginScreen()),
                         );
                       },
-                      child: Text(
-                        'Connectez-vous',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.bold,
                     ),
                   ],
                 ),
@@ -329,6 +226,33 @@ class _RegisterScreenState extends State<RegisterScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    IconData? icon,
+    bool obscureText = false,
+    TextInputType keyboardType = TextInputType.text,
+    Widget? suffixIcon,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        hintText: hint,
+        prefixIcon: icon != null ? Icon(icon) : null,
+        suffixIcon: suffixIcon,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+      ),
+      obscureText: obscureText,
+      keyboardType: keyboardType,
+      validator: validator,
     );
   }
 }
