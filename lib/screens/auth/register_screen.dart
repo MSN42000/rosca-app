@@ -98,11 +98,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Logo ou icône
-                Icon(
-                  Icons.person_add_alt_1,
-                  size: 100,
-                  color: AppColors.primary,
+                // Logo ou image
+                Image(
+                  image: const AssetImage('assets/logo.png'),
+                  height: 120,
+                  fit: BoxFit.contain,
                 ),
                 SizedBox(height: AppSpacing.lg),
 

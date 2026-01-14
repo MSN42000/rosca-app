@@ -146,7 +146,13 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Icon(Icons.account_circle, size: 120, color: AppColors.primary),
+                  Image(
+                    image: const AssetImage('assets/logo.png'),
+                    height: 120,
+                    fit: BoxFit.contain,
+                  ),
+
+
                   SizedBox(height: AppSpacing.lg),
                   Text('Bienvenue !', style: TextStyles.h1.copyWith(color: AppColors.primaryDark), textAlign: TextAlign.center),
                   SizedBox(height: AppSpacing.sm),
