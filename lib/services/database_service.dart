@@ -1,148 +1,229 @@
+// lib/services/database_service.dart
 
-// Import Firestore database package
 import 'package:cloud_firestore/cloud_firestore.dart';
-
-// Import user data model
 import '../models/user_model.dart';
 
-// DatabaseService centralizes all Firestore operations
-// It keeps database logic clean, reusable, and separated from UI
+/// Centralizes all Firestore operations related to users
 class DatabaseService {
-
-  // Firebase Firestore instance (entry point to the database)
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
+  // =====================================================
+  // USER PROFILE
+  // =====================================================
 
-  // Creates or updates a user profile after authentication
-  // This method is usually called right after user signup
+  /// Create or update a user profile (merge prevents overwrite)
   Future<void> createUserProfile({
     required String userId,
     required String name,
     required String email,
     String? phone,
   }) async {
-    try {
-      // Access "users" collection and create document with userId
-      await _db.collection('users').doc(userId).set({
-        'name': name,
-        'email': email,
-        'phone': phone,
-        'createdAt': FieldValue.serverTimestamp(),
-        'updatedAt': FieldValue.serverTimestamp(),
-      });
-
-      // Confirm creation
-      print('User profile created');
-    } catch (e) {
-      // Forward error to caller
-      print('Error creating user profile');
-      rethrow;
-    }
+    await _db.collection('users').doc(userId).set({
+      'name': name,
+      'email': email,
+      'phone': phone,
+      'walletBalance': 0.0,
+      'groupIds': [],
+      'adminGroupIds': [],
+      'createdAt': FieldValue.serverTimestamp(),
+    }, SetOptions(merge: true));
   }
 
-  // Fetches a user profile once (non real-time)
-  // Returns a UserModel or null if not found
+  /// Get user profile once
   Future<UserModel?> getUserProfile(String userId) async {
-    try {
-      // Retrieve user document
-      final doc = await _db.collection('users').doc(userId).get();
+    final doc = await _db.collection('users').doc(userId).get();
 
-      // Convert document to model if it exists
-      if (doc.exists) {
+    if (doc.exists && doc.data() != null) {
+      return UserModel.fromFirestore(doc);
+    }
+    return null;
+  }
+
+  /// Listen to user profile changes in real time
+  Stream<UserModel?> getUserProfileStream(String userId) {
+    return _db.collection('users').doc(userId).snapshots().map((doc) {
+      if (doc.exists && doc.data() != null) {
         return UserModel.fromFirestore(doc);
       }
-
-      // User not found
       return null;
-    } catch (e) {
-      print('Error fetching user profile');
-      return null;
-    }
+    });
   }
 
-  // Listens to user profile changes in real time
-  // Useful for live UI updates
-  Stream<DocumentSnapshot> getUserStream(String userId) {
-    return _db.collection('users').doc(userId).snapshots();
-  }
-
-  // Updates specific fields of a user profile
-  // Unlike set(), update() preserves existing fields
+  /// Update selected fields of the user profile
   Future<void> updateUserProfile({
     required String userId,
-    required Map<String, dynamic> data,
+    String? name,
+    String? email,
+    String? phone,
   }) async {
-    try {
-      // Automatically track last update time
-      data['updatedAt'] = FieldValue.serverTimestamp();
+    final Map<String, dynamic> updates = {};
 
-      // Apply partial update
-      await _db.collection('users').doc(userId).update(data);
+    if (name != null) updates['name'] = name;
+    if (email != null) updates['email'] = email;
+    if (phone != null) updates['phone'] = phone;
 
-      print('User profile updated');
-    } catch (e) {
-      print('Error updating profile');
-      rethrow;
+    if (updates.isNotEmpty) {
+      await _db.collection('users').doc(userId).update(updates);
     }
   }
 
-  // Deletes a user profile from Firestore
-  // Does NOT delete Firebase Authentication account
+  /// Delete user profile
   Future<void> deleteUserProfile(String userId) async {
-    try {
-      await _db.collection('users').doc(userId).delete();
-      print('User profile deleted');
-    } catch (e) {
-      print('Error deleting profile');
-      rethrow;
-    }
+    await _db.collection('users').doc(userId).delete();
   }
 
-  // Searches users by exact name match
-  // Firestore does not support partial string search
+  // =====================================================
+  // WALLET
+  // =====================================================
+
+  /// Set wallet balance
+  Future<void> updateWalletBalance({
+    required String userId,
+    required double newBalance,
+  }) async {
+    await _db.collection('users').doc(userId).update({
+      'walletBalance': newBalance,
+    });
+  }
+
+  /// Add amount to wallet (atomic)
+  Future<void> addToWallet({
+    required String userId,
+    required double amount,
+  }) async {
+    await _db.collection('users').doc(userId).update({
+      'walletBalance': FieldValue.increment(amount),
+    });
+  }
+
+  /// Deduct amount from wallet (atomic)
+  Future<void> deductFromWallet({
+    required String userId,
+    required double amount,
+  }) async {
+    await _db.collection('users').doc(userId).update({
+      'walletBalance': FieldValue.increment(-amount),
+    });
+  }
+
+  /// Get wallet balance only
+  Future<double> getWalletBalance(String userId) async {
+    final doc = await _db.collection('users').doc(userId).get();
+    if (doc.exists) {
+      return (doc.data()?['walletBalance'] ?? 0.0).toDouble();
+    }
+    return 0.0;
+  }
+
+  // =====================================================
+  // GROUP MANAGEMENT
+  // =====================================================
+
+  /// Add user to a group
+  Future<void> addUserToGroup({
+    required String userId,
+    required String groupId,
+  }) async {
+    await _db.collection('users').doc(userId).update({
+      'groupIds': FieldValue.arrayUnion([groupId]),
+    });
+  }
+
+  /// Remove user from a group
+  Future<void> removeUserFromGroup({
+    required String userId,
+    required String groupId,
+  }) async {
+    await _db.collection('users').doc(userId).update({
+      'groupIds': FieldValue.arrayRemove([groupId]),
+    });
+  }
+
+  /// Set user as group admin
+  Future<void> addUserAsGroupAdmin({
+    required String userId,
+    required String groupId,
+  }) async {
+    await _db.collection('users').doc(userId).update({
+      'adminGroupIds': FieldValue.arrayUnion([groupId]),
+    });
+  }
+
+  /// Remove admin rights from a group
+  Future<void> removeUserAsGroupAdmin({
+    required String userId,
+    required String groupId,
+  }) async {
+    await _db.collection('users').doc(userId).update({
+      'adminGroupIds': FieldValue.arrayRemove([groupId]),
+    });
+  }
+
+  /// Get all groups of a user
+  Future<List<String>> getUserGroups(String userId) async {
+    final doc = await _db.collection('users').doc(userId).get();
+    if (doc.exists) {
+      return List<String>.from(doc.data()?['groupIds'] ?? []);
+    }
+    return [];
+  }
+
+  /// Get all admin groups of a user
+  Future<List<String>> getUserAdminGroups(String userId) async {
+    final doc = await _db.collection('users').doc(userId).get();
+    if (doc.exists) {
+      return List<String>.from(doc.data()?['adminGroupIds'] ?? []);
+    }
+    return [];
+  }
+
+  // =====================================================
+  // USER SEARCH & LISTING
+  // =====================================================
+
+  /// Search users by exact name
   Future<List<UserModel>> searchUsersByName(String name) async {
-    try {
-      final snapshot = await _db
-          .collection('users')
-          .where('name', isEqualTo: name)
-          .get();
+    final snapshot = await _db
+        .collection('users')
+        .where('name', isEqualTo: name)
+        .get();
 
-      // Convert results into models
-      return snapshot.docs
-          .map((doc) => UserModel.fromFirestore(doc))
-          .toList();
-    } catch (e) {
-      print('Search error');
-      return [];
-    }
+    return snapshot.docs
+        .map((doc) => UserModel.fromFirestore(doc))
+        .toList();
   }
 
-  // Retrieves all users (optionally limited)
-  // Should be used carefully for large collections
+  /// Search user by email
+  Future<UserModel?> searchUserByEmail(String email) async {
+    final snapshot = await _db
+        .collection('users')
+        .where('email', isEqualTo: email)
+        .limit(1)
+        .get();
+
+    if (snapshot.docs.isNotEmpty) {
+      return UserModel.fromFirestore(snapshot.docs.first);
+    }
+    return null;
+  }
+
+  /// Get all users (optional limit)
   Future<List<UserModel>> getAllUsers({int? limit}) async {
-    try {
-      Query query = _db
-          .collection('users')
-          .orderBy('createdAt', descending: true);
+    Query query = _db
+        .collection('users')
+        .orderBy('createdAt', descending: true);
 
-      // Apply limit if provided
-      if (limit != null) {
-        query = query.limit(limit);
-      }
-
-      final snapshot = await query.get();
-
-      return snapshot.docs
-          .map((doc) => UserModel.fromFirestore(doc))
-          .toList();
-    } catch (e) {
-      print('Error loading users');
-      return [];
+    if (limit != null) {
+      query = query.limit(limit);
     }
+
+    final snapshot = await query.get();
+    return snapshot.docs
+        .map((doc) => UserModel.fromFirestore(doc))
+        .toList();
   }
 
-  // Listens to all users in real time
-  // Ideal for live lists or admin dashboards
+  /// Listen to all users in real time
   Stream<List<UserModel>> getAllUsersStream({int? limit}) {
     Query query = _db
         .collection('users')
@@ -159,52 +240,51 @@ class DatabaseService {
     );
   }
 
-  // Atomically increments a numeric field
-  // Prevents concurrency issues
+  /// Get users by their document IDs (Firestore limit: 10)
+  Future<List<UserModel>> getUsersByIds(List<String> userIds) async {
+    if (userIds.isEmpty) return [];
+
+    List<UserModel> users = [];
+
+    for (int i = 0; i < userIds.length; i += 10) {
+      final batch = userIds.skip(i).take(10).toList();
+      final snapshot = await _db
+          .collection('users')
+          .where(FieldPath.documentId, whereIn: batch)
+          .get();
+
+      users.addAll(
+        snapshot.docs.map((doc) => UserModel.fromFirestore(doc)),
+      );
+    }
+
+    return users;
+  }
+
+  // =====================================================
+  // GENERIC UTILITIES
+  // =====================================================
+
+  /// Atomically increment a numeric field
   Future<void> incrementField({
-    required String collection,
-    required String docId,
+    required String userId,
     required String field,
-    int value = 1,
+    num value = 1,
   }) async {
-    try {
-      await _db.collection(collection).doc(docId).update({
-        field: FieldValue.increment(value),
-      });
-    } catch (e) {
-      print('Increment error');
-    }
+    await _db.collection('users').doc(userId).update({
+      field: FieldValue.increment(value),
+    });
   }
 
-  // Adds a value to an array field if it does not already exist
-  Future<void> addToArray({
-    required String collection,
-    required String docId,
-    required String field,
-    required dynamic value,
-  }) async {
-    try {
-      await _db.collection(collection).doc(docId).update({
-        field: FieldValue.arrayUnion([value]),
-      });
-    } catch (e) {
-      print('Array add error');
-    }
+  /// Check if a user exists
+  Future<bool> userExists(String userId) async {
+    final doc = await _db.collection('users').doc(userId).get();
+    return doc.exists;
   }
 
-  // Removes a value from an array field
-  Future<void> removeFromArray({
-    required String collection,
-    required String docId,
-    required String field,
-    required dynamic value,
-  }) async {
-    try {
-      await _db.collection(collection).doc(docId).update({
-        field: FieldValue.arrayRemove([value]),
-      });
-    } catch (e) {
-      print('Array remove error');
-    }
+  /// Get total number of users
+  Future<int> getTotalUsersCount() async {
+    final snapshot = await _db.collection('users').count().get();
+    return snapshot.count ?? 0;
   }
 }

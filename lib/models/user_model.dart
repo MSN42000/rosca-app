@@ -35,18 +35,17 @@ class UserModel {
   /// Optional phone number.
   final String? phone;
 
-  /// Optional profile picture URL.
-  final String? photoUrl;
+  /// Wallet balance of the user.
+  final double walletBalance;
+
+  /// List of group IDs the user is a member of.
+  final List<String> groupIds;
+
+  /// List of group IDs where the user is an admin.
+  final List<String> adminGroupIds;
 
   /// Date when the account was created.
   final DateTime? createdAt;
-
-  /// Date of the last profile update.
-  final DateTime? updatedAt;
-
-  /// Current account status.
-  /// Possible values: active, suspended, deleted.
-  final String status;
 
   // -------------------------------------------------------------------
   // Constructor
@@ -61,10 +60,10 @@ class UserModel {
     required this.name,
     required this.email,
     this.phone,
-    this.photoUrl,
+    this.walletBalance = 0.0,
+    this.groupIds = const [],
+    this.adminGroupIds = const [],
     this.createdAt,
-    this.updatedAt,
-    this.status = 'active',
   });
 
   // -------------------------------------------------------------------
@@ -84,14 +83,12 @@ class UserModel {
       name: data['name'] ?? '',
       email: data['email'] ?? '',
       phone: data['phone'],
-      photoUrl: data['photoUrl'],
+      walletBalance: (data['walletBalance'] ?? 0.0).toDouble(),
+      groupIds: List<String>.from(data['groupIds'] ?? []),
+      adminGroupIds: List<String>.from(data['adminGroupIds'] ?? []),
       createdAt: data['createdAt'] != null
           ? (data['createdAt'] as Timestamp).toDate()
           : null,
-      updatedAt: data['updatedAt'] != null
-          ? (data['updatedAt'] as Timestamp).toDate()
-          : null,
-      status: data['status'] ?? 'active',
     );
   }
 
@@ -112,14 +109,12 @@ class UserModel {
       name: map['name'] ?? '',
       email: map['email'] ?? '',
       phone: map['phone'],
-      photoUrl: map['photoUrl'],
+      walletBalance: (map['walletBalance'] ?? 0.0).toDouble(),
+      groupIds: List<String>.from(map['groupIds'] ?? []),
+      adminGroupIds: List<String>.from(map['adminGroupIds'] ?? []),
       createdAt: map['createdAt'] != null
           ? (map['createdAt'] as Timestamp).toDate()
           : null,
-      updatedAt: map['updatedAt'] != null
-          ? (map['updatedAt'] as Timestamp).toDate()
-          : null,
-      status: map['status'] ?? 'active',
     );
   }
 
@@ -136,12 +131,12 @@ class UserModel {
       'name': name,
       'email': email,
       'phone': phone,
-      'photoUrl': photoUrl,
-      'status': status,
+      'walletBalance': walletBalance,
+      'groupIds': groupIds,
+      'adminGroupIds': adminGroupIds,
       'createdAt': createdAt != null
           ? Timestamp.fromDate(createdAt!)
           : FieldValue.serverTimestamp(),
-      'updatedAt': FieldValue.serverTimestamp(),
     };
   }
 
@@ -157,9 +152,9 @@ class UserModel {
       'name': name,
       'email': email,
       'phone': phone,
-      'photoUrl': photoUrl,
-      'status': status,
-      'updatedAt': FieldValue.serverTimestamp(),
+      'walletBalance': walletBalance,
+      'groupIds': groupIds,
+      'adminGroupIds': adminGroupIds,
     };
   }
 
@@ -176,20 +171,20 @@ class UserModel {
     String? name,
     String? email,
     String? phone,
-    String? photoUrl,
+    double? walletBalance,
+    List<String>? groupIds,
+    List<String>? adminGroupIds,
     DateTime? createdAt,
-    DateTime? updatedAt,
-    String? status,
   }) {
     return UserModel(
       id: id ?? this.id,
       name: name ?? this.name,
       email: email ?? this.email,
       phone: phone ?? this.phone,
-      photoUrl: photoUrl ?? this.photoUrl,
+      walletBalance: walletBalance ?? this.walletBalance,
+      groupIds: groupIds ?? this.groupIds,
+      adminGroupIds: adminGroupIds ?? this.adminGroupIds,
       createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-      status: status ?? this.status,
     );
   }
 
@@ -205,11 +200,14 @@ class UserModel {
         phone!.isNotEmpty;
   }
 
-  /// Returns true if the account is active.
-  bool isActive() => status == 'active';
+  /// Returns true if the user is an admin of any group.
+  bool isAdmin() => adminGroupIds.isNotEmpty;
 
-  /// Returns true if the account is suspended.
-  bool isSuspended() => status == 'suspended';
+  /// Returns true if the user is an admin of a specific group.
+  bool isAdminOf(String groupId) => adminGroupIds.contains(groupId);
+
+  /// Returns true if the user is a member of a specific group.
+  bool isMemberOf(String groupId) => groupIds.contains(groupId);
 
   /// Returns the initials of the user's name.
   ///
@@ -231,7 +229,7 @@ class UserModel {
   /// Returns a readable string representation of the object.
   @override
   String toString() {
-    return 'UserModel(id: $id, name: $name, email: $email)';
+    return 'UserModel(id: $id, name: $name, email: $email, walletBalance: $walletBalance)';
   }
 
   /// Compares two UserModel instances by value rather than by reference.
@@ -244,7 +242,7 @@ class UserModel {
         other.name == name &&
         other.email == email &&
         other.phone == phone &&
-        other.status == status;
+        other.walletBalance == walletBalance;
   }
 
   /// Generates a hash code consistent with the equality operator.
@@ -254,6 +252,6 @@ class UserModel {
     name.hashCode ^
     email.hashCode ^
     (phone?.hashCode ?? 0) ^
-    status.hashCode;
+    walletBalance.hashCode;
   }
 }
