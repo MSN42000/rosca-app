@@ -34,7 +34,7 @@ class AppColors {
   // 5. COULEURS DE TEXTE
   // ============================================
   static const Color textPrimary = Color(0xFF212121);  // Noir (texte principal)
-  static const Color textSecondary = Color(0xFF757575); // Gris (texte secondaire)
+  static const Color textSecondary = Color(0xFFFFFFFF); // Blanc (texte secondaire)
   static const Color textDisabled = Color(0xFF9E9E9E); // Gris clair (texte désactivé)
 
   // ============================================

@@ -199,7 +199,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   onPressed: register,
                   isLoading: _isLoading,
                   padding: EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.xxl),
-                  type: ButtonType.primary,
+                  type: ButtonType.secondary,
                 ),
                 SizedBox(height: AppSpacing.md),
 
