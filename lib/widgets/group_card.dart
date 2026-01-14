@@ -46,7 +46,7 @@ class GroupCard extends StatelessWidget {
   }
 
   Widget _buildMemberAvatars(BuildContext context) {
-    final activeMembers = group.members.where((m) => m.status == 'active').toList();
+    final activeMembers = group.members;
     final displayMembers = activeMembers.take(3);
     final remainingCount = activeMembers.length - 3;
 
@@ -191,32 +191,32 @@ class GroupCard extends StatelessWidget {
                         ],
                       ),
                     ),
-                  if (group.isActive && group.currentReceiverId != null)
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                      decoration: BoxDecoration(
-                        color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                      ),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Icon(
-                            Icons.person,
-                            color: Theme.of(context).colorScheme.primary,
-                            size: 14,
-                          ),
-                          const SizedBox(width: 4),
-                          Text(
-                            'Current Receiver',
-                            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              color: Theme.of(context).colorScheme.primary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
+                  // if (group.isActive && group.currentReceiverId != null)
+                  //   Container(
+                  //     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  //     decoration: BoxDecoration(
+                  //       color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                  //       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  //     ),
+                  //     child: Row(
+                  //       mainAxisSize: MainAxisSize.min,
+                  //       children: [
+                  //         Icon(
+                  //           Icons.person,
+                  //           color: Theme.of(context).colorScheme.primary,
+                  //           size: 14,
+                  //         ),
+                  //         const SizedBox(width: 4),
+                  //         Text(
+                  //           'Current Receiver',
+                  //           style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  //             color: Theme.of(context).colorScheme.primary,
+                  //             fontWeight: FontWeight.w600,
+                  //           ),
+                  //         ),
+                  //       ],
+                  //     ),
+                  //   ),
                 ],
               ),
               if (showActions)
