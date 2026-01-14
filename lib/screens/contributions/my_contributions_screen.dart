@@ -1,6 +1,7 @@
 // lib/screens/contributions/my_contributions_screen.dart
 
 import 'package:flutter/material.dart';
+import 'package:rosca_app/screens/contributions/my_contributions_screen.dart';
 import '../../models/contribution_model.dart';
 import '../../services/contribution_service.dart';
 import '../../services/auth_service.dart';
@@ -15,7 +16,7 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
   final ContributionService _contributionService = ContributionService();
   final AuthService _authService = AuthService();
 
-  String _selectedFilter = 'all'; // all, pending, paid, approved
+  String _selectedFilter = 'all'; // all, pending, paid
 
   @override
   Widget build(BuildContext context) {
@@ -41,7 +42,6 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
               PopupMenuItem(value: 'all', child: Text('Toutes')),
               PopupMenuItem(value: 'pending', child: Text('En attente')),
               PopupMenuItem(value: 'paid', child: Text('Payées')),
-              PopupMenuItem(value: 'approved', child: Text('Approuvées')),
             ],
           ),
         ],
@@ -84,11 +84,9 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
 
           // Calculer les statistiques
           final totalAmount = contributions
-              .where((c) => c.isPaid || c.isApproved)
+              .where((c) => c.isPaid)
               .fold(0.0, (sum, c) => sum + c.amount);
-          final pendingCount =
-              contributions.where((c) => c.isPending).length;
-          final overdueCount = contributions.where((c) => c.isOverdue).length;
+          final pendingCount = contributions.where((c) => c.isPending).length;
 
           return Column(
             children: [
@@ -108,12 +106,7 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                       label: 'En attente',
                       value: '$pendingCount',
                       icon: Icons.pending,
-                    ),
-                    _buildStatCard(
-                      label: 'En retard',
-                      value: '$overdueCount',
-                      icon: Icons.warning,
-                      color: Colors.red,
+                      color: Colors.orange,
                     ),
                   ],
                 ),
@@ -165,31 +158,14 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
     IconData statusIcon;
     String statusText;
 
-    switch (contribution.status) {
-      case 'pending':
-        statusColor = Colors.orange;
-        statusIcon = Icons.pending;
-        statusText = 'En attente';
-        break;
-      case 'paid':
-        statusColor = Colors.blue;
-        statusIcon = Icons.payment;
-        statusText = 'Payée';
-        break;
-      case 'approved':
-        statusColor = Colors.green;
-        statusIcon = Icons.check_circle;
-        statusText = 'Approuvée';
-        break;
-      case 'rejected':
-        statusColor = Colors.red;
-        statusIcon = Icons.cancel;
-        statusText = 'Rejetée';
-        break;
-      default:
-        statusColor = Colors.grey;
-        statusIcon = Icons.help;
-        statusText = contribution.status;
+    if (contribution.isPending) {
+      statusColor = Colors.orange;
+      statusIcon = Icons.pending;
+      statusText = 'En attente';
+    } else {
+      statusColor = Colors.green;
+      statusIcon = Icons.check_circle;
+      statusText = 'Payée';
     }
 
     return Card(
@@ -206,13 +182,11 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Expanded(
-                    child: Text(
-                      contribution.groupName,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
+                  Text(
+                    'Round ${contribution.roundNumber}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                   Container(
@@ -248,41 +222,19 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                   color: Theme.of(context).primaryColor,
                 ),
               ),
-              SizedBox(height: 8),
-              Row(
-                children: [
-                  Icon(Icons.repeat, size: 16, color: Colors.grey),
-                  SizedBox(width: 4),
-                  Text(
-                    'Round ${contribution.roundNumber}',
-                    style: TextStyle(color: Colors.grey[600]),
-                  ),
-                  if (contribution.dueDate != null) ...[
-                    SizedBox(width: 16),
+              if (contribution.paidAt != null) ...[
+                SizedBox(height: 8),
+                Row(
+                  children: [
                     Icon(Icons.calendar_today, size: 16, color: Colors.grey),
                     SizedBox(width: 4),
                     Text(
-                      'Échéance: ${DateFormat('dd/MM/yyyy').format(contribution.dueDate!)}',
-                      style: TextStyle(
-                        color: contribution.isOverdue
-                            ? Colors.red
-                            : Colors.grey[600],
-                      ),
+                      'Payée le ${DateFormat('dd/MM/yyyy').format(contribution.paidAt!)}',
+                      style: TextStyle(color: Colors.grey[600]),
                     ),
                   ],
-                ],
-              ),
-              if (contribution.isOverdue)
-                Padding(
-                  padding: EdgeInsets.only(top: 8),
-                  child: Text(
-                    '⚠️ En retard',
-                    style: TextStyle(
-                      color: Colors.red,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
                 ),
+              ],
             ],
           ),
         ),
@@ -308,16 +260,14 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 16),
-              _buildDetailRow('Groupe', contribution.groupName),
               _buildDetailRow('Montant',
                   '${contribution.amount.toStringAsFixed(2)} MAD'),
               _buildDetailRow('Round', '${contribution.roundNumber}'),
               _buildDetailRow('Statut', contribution.status),
               if (contribution.paidAt != null)
                 _buildDetailRow('Payée le',
-                    DateFormat('dd/MM/yyyy à HH:mm').format(contribution.paidAt!)),
-              if (contribution.approvedBy != null)
-                _buildDetailRow('Approuvée par', contribution.approvedBy!),
+                    DateFormat('dd/MM/yyyy à HH:mm')
+                        .format(contribution.paidAt!)),
               SizedBox(height: 16),
               if (contribution.isPending)
                 ElevatedButton(

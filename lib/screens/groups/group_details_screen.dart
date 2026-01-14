@@ -1,10 +1,10 @@
 // lib/screens/groups/group_details_screen.dart
-
 import 'package:flutter/material.dart';
 import '../../models/group_model.dart';
 import '../../services/group_service.dart';
 import '../../services/contribution_service.dart';
 import '../../services/auth_service.dart';
+import 'package:rosca_app/screens/contributions/my_contributions_screen.dart';
 
 class GroupDetailsScreen extends StatefulWidget {
   final String groupId;
@@ -25,14 +25,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Détails du groupe'),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.settings),
-            onPressed: () {
-              // Navigation vers les paramètres du groupe
-            },
-          ),
-        ],
       ),
       body: StreamBuilder<GroupModel?>(
         stream: _groupService.getGroupStream(widget.groupId),
@@ -42,15 +34,11 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           }
 
           if (snapshot.hasError) {
-            return Center(
-              child: Text('Erreur: ${snapshot.error}'),
-            );
+            return Center(child: Text('Erreur: ${snapshot.error}'));
           }
 
           if (!snapshot.hasData || snapshot.data == null) {
-            return Center(
-              child: Text('Groupe introuvable'),
-            );
+            return Center(child: Text('Groupe introuvable'));
           }
 
           final group = snapshot.data!;
@@ -114,7 +102,7 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                       ),
                       _buildInfoCard(
                         icon: Icons.people,
-                        label: 'Membres actifs',
+                        label: 'Membres',
                         value: '${group.activeMembersCount}',
                       ),
                       _buildInfoCard(
@@ -126,14 +114,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                       _buildInfoCard(
                         icon: Icons.circle,
                         label: 'Statut',
-                        value: group.status == 'active'
-                            ? 'Actif'
-                            : group.status == 'completed'
-                            ? 'Terminé'
-                            : 'Annulé',
-                        valueColor: group.status == 'active'
-                            ? Colors.green
-                            : Colors.grey,
+                        value: group.status == 'active' ? 'Actif' : 'Terminé',
+                        valueColor:
+                        group.status == 'active' ? Colors.green : Colors.grey,
                       ),
                       SizedBox(height: 20),
 
@@ -155,35 +138,47 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                         ],
                       ),
                       SizedBox(height: 10),
-                      ...group.members.map((member) {
-                        return Card(
-                          child: ListTile(
-                            leading: CircleAvatar(
-                              child: Text(
-                                member.name.isNotEmpty
-                                    ? member.name[0].toUpperCase()
-                                    : '?',
-                              ),
-                            ),
-                            title: Text(member.name),
-                            subtitle: Text(member.email),
-                            trailing: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                if (member.hasReceived)
-                                  Icon(Icons.check_circle,
-                                      color: Colors.green),
-                                if (member.role == 'admin')
-                                  Chip(
-                                    label: Text('Admin',
-                                        style: TextStyle(fontSize: 10)),
-                                    backgroundColor: Colors.blue[100],
-                                  ),
-                              ],
+
+                      if (group.members.isEmpty)
+                        Center(
+                          child: Padding(
+                            padding: EdgeInsets.all(20),
+                            child: Text(
+                              'Aucun membre pour le moment',
+                              style: TextStyle(color: Colors.grey),
                             ),
                           ),
-                        );
-                      }).toList(),
+                        )
+                      else
+                        ...group.members.map((member) {
+                          return Card(
+                            child: ListTile(
+                              leading: CircleAvatar(
+                                child: Text(
+                                  member.name.isNotEmpty
+                                      ? member.name[0].toUpperCase()
+                                      : '?',
+                                ),
+                              ),
+                              title: Text(member.name),
+                              subtitle: Text(member.email),
+                              trailing: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (member.hasReceived)
+                                    Icon(Icons.check_circle,
+                                        color: Colors.green),
+                                  if (member.role == 'admin')
+                                    Chip(
+                                      label: Text('Admin',
+                                          style: TextStyle(fontSize: 10)),
+                                      backgroundColor: Colors.blue[100],
+                                    ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }).toList(),
                     ],
                   ),
                 ),
@@ -197,18 +192,20 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
                         ElevatedButton.icon(
-                          onPressed: () => _nextRound(group),
-                          icon: Icon(Icons.navigate_next),
-                          label: Text('Passer au round suivant'),
+                          onPressed: group.members.isEmpty
+                              ? null
+                              : () => _createRoundContributions(group),
+                          icon: Icon(Icons.add_circle),
+                          label: Text('Créer contributions du round'),
                           style: ElevatedButton.styleFrom(
                             padding: EdgeInsets.symmetric(vertical: 12),
                           ),
                         ),
                         SizedBox(height: 10),
                         OutlinedButton.icon(
-                          onPressed: () => _createRoundContributions(group),
-                          icon: Icon(Icons.add_circle),
-                          label: Text('Créer contributions du round'),
+                          onPressed: () => _nextRound(group),
+                          icon: Icon(Icons.navigate_next),
+                          label: Text('Passer au round suivant'),
                           style: OutlinedButton.styleFrom(
                             padding: EdgeInsets.symmetric(vertical: 12),
                           ),
@@ -264,23 +261,36 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   void _showAddMemberDialog(GroupModel group) {
     final nameController = TextEditingController();
     final emailController = TextEditingController();
+    final userIdController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
         title: Text('Ajouter un membre'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: InputDecoration(labelText: 'Nom'),
-            ),
-            TextField(
-              controller: emailController,
-              decoration: InputDecoration(labelText: 'Email'),
-            ),
-          ],
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: userIdController,
+                decoration: InputDecoration(
+                  labelText: 'ID Utilisateur',
+                  hintText: 'Entrez l\'ID Firebase de l\'utilisateur',
+                ),
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(labelText: 'Nom'),
+              ),
+              SizedBox(height: 10),
+              TextField(
+                controller: emailController,
+                decoration: InputDecoration(labelText: 'Email'),
+                keyboardType: TextInputType.emailAddress,
+              ),
+            ],
+          ),
         ),
         actions: [
           TextButton(
@@ -289,8 +299,31 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              // Logique pour ajouter le membre
-              Navigator.pop(context);
+              if (userIdController.text.trim().isEmpty ||
+                  nameController.text.trim().isEmpty ||
+                  emailController.text.trim().isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Veuillez remplir tous les champs')),
+                );
+                return;
+              }
+
+              try {
+                await _groupService.addMember(
+                  groupId: group.id,
+                  userId: userIdController.text.trim(),
+                  name: nameController.text.trim(),
+                  email: emailController.text.trim(),
+                );
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Membre ajouté avec succès !')),
+                );
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Erreur: $e')),
+                );
+              }
             },
             child: Text('Ajouter'),
           ),
@@ -300,10 +333,17 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   }
 
   void _nextRound(GroupModel group) async {
+    if (group.currentRound >= group.totalRounds) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Le groupe a terminé tous ses rounds')),
+      );
+      return;
+    }
+
     try {
       await _groupService.nextRound(groupId: group.id);
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Round suivant activé !')),
+        SnackBar(content: Text('Round ${group.currentRound + 1} activé !')),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -313,22 +353,27 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   }
 
   void _createRoundContributions(GroupModel group) async {
+    if (group.members.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ajoutez des membres avant de créer les contributions')),
+      );
+      return;
+    }
+
     try {
       final memberIds = group.members.map((m) => m.userId).toList();
 
       await _contributionService.createRoundContributionsForGroup(
         groupId: group.id,
-        groupName: group.name,
         memberIds: memberIds,
         amount: group.monthlyAmount,
         roundNumber: group.currentRound,
-        dueDate: DateTime.now().add(Duration(days: 30)),
       );
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content:
-            Text('Contributions créées pour ${memberIds.length} membres')),
+          content: Text('✅ ${memberIds.length} contributions créées pour le round ${group.currentRound}'),
+        ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
