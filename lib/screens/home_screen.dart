@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:rosca_app/theme/app_theme.dart';
+import 'package:rosca_app/widgets/custom_appbar.dart';
 import 'groups/create_group_screen.dart';
 import 'contributions/my_contributions_screen.dart';
 import '../services/auth_service.dart';
 import '../services/group_service.dart';
 import '../models/group_model.dart';
 import 'groups/group_details_screen.dart';
+import '../widgets/group_card.dart';
 
 class HomeScreen extends StatelessWidget {
   final AuthService _authService = AuthService();
@@ -15,11 +18,12 @@ class HomeScreen extends StatelessWidget {
     final currentUserId = _authService.currentUserId ?? '';
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Mes Groupes'),
+      appBar: CustomAppBar(
+        title: 'Mes Groupes',
+        showBackButton: false,
         actions: [
           IconButton(
-            icon: Icon(Icons.receipt),
+            icon: Icon(Icons.receipt, color: Colors.white),
             onPressed: () {
               Navigator.push(
                 context,
@@ -30,7 +34,7 @@ class HomeScreen extends StatelessWidget {
             },
           ),
           IconButton(
-            icon: Icon(Icons.logout),
+            icon: Icon(Icons.logout, color: Colors.white),
             onPressed: () async {
               await _authService.logout();
               Navigator.pushReplacementNamed(context, '/login');
@@ -85,51 +89,16 @@ class HomeScreen extends StatelessWidget {
             itemCount: groups.length,
             itemBuilder: (context, index) {
               final group = groups[index];
-              return Card(
-                margin: EdgeInsets.only(bottom: 12),
-                child: ListTile(
-                  leading: CircleAvatar(
-                    child: Icon(Icons.group),
-                  ),
-                  title: Text(
-                    group.name,
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  subtitle: Text(
-                    'Round ${group.currentRound}/${group.totalRounds} • ${group.activeMembersCount} membres',
-                  ),
-                  trailing: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.end,
-                    children: [
-                      Text(
-                        '${group.monthlyAmount.toStringAsFixed(0)} MAD',
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                      Text(
-                        group.status == 'active' ? 'Actif' : 'Terminé',
-                        style: TextStyle(
-                          color: group.status == 'active'
-                              ? Colors.green
-                              : Colors.grey,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (_) =>
-                            GroupDetailsScreen(groupId: group.id),
-                      ),
-                    );
-                  },
-                ),
+              return GroupCard(
+                group: group,
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => GroupDetailsScreen(groupId: group.id),
+                    ),
+                  );
+                },
               );
             },
           );
@@ -142,8 +111,12 @@ class HomeScreen extends StatelessWidget {
             MaterialPageRoute(builder: (_) => CreateGroupScreen()),
           );
         },
-        child: Icon(Icons.add),
         tooltip: 'Créer un groupe',
+        backgroundColor: AppColors.primaryLight,
+        child: Icon(
+          Icons.add,
+          color: AppColors.background,
+        ),
       ),
     );
   }

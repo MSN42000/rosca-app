@@ -183,14 +183,10 @@ class DatabaseService {
 
   /// Search users by exact name
   Future<List<UserModel>> searchUsersByName(String name) async {
-    final snapshot = await _db
-        .collection('users')
-        .where('name', isEqualTo: name)
-        .get();
+    final snapshot =
+        await _db.collection('users').where('name', isEqualTo: name).get();
 
-    return snapshot.docs
-        .map((doc) => UserModel.fromFirestore(doc))
-        .toList();
+    return snapshot.docs.map((doc) => UserModel.fromFirestore(doc)).toList();
   }
 
   /// Search user by email
@@ -209,35 +205,30 @@ class DatabaseService {
 
   /// Get all users (optional limit)
   Future<List<UserModel>> getAllUsers({int? limit}) async {
-    Query query = _db
-        .collection('users')
-        .orderBy('createdAt', descending: true);
+    Query query =
+        _db.collection('users').orderBy('createdAt', descending: true);
 
     if (limit != null) {
       query = query.limit(limit);
     }
 
     final snapshot = await query.get();
-    return snapshot.docs
-        .map((doc) => UserModel.fromFirestore(doc))
-        .toList();
+    return snapshot.docs.map((doc) => UserModel.fromFirestore(doc)).toList();
   }
 
   /// Listen to all users in real time
   Stream<List<UserModel>> getAllUsersStream({int? limit}) {
-    Query query = _db
-        .collection('users')
-        .orderBy('createdAt', descending: true);
+    Query query =
+        _db.collection('users').orderBy('createdAt', descending: true);
 
     if (limit != null) {
       query = query.limit(limit);
     }
 
     return query.snapshots().map(
-          (snapshot) => snapshot.docs
-          .map((doc) => UserModel.fromFirestore(doc))
-          .toList(),
-    );
+          (snapshot) =>
+              snapshot.docs.map((doc) => UserModel.fromFirestore(doc)).toList(),
+        );
   }
 
   /// Get users by their document IDs (Firestore limit: 10)

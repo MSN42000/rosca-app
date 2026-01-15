@@ -73,7 +73,8 @@ class CustomButton extends StatelessWidget {
         style: ElevatedButton.styleFrom(
           backgroundColor: _getBackgroundColor(context),
           foregroundColor: _getTextColor(context),
-          disabledBackgroundColor: _getBackgroundColor(context).withOpacity(0.5),
+          disabledBackgroundColor:
+              _getBackgroundColor(context).withOpacity(0.5),
           padding: padding,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borderRadius),
@@ -90,29 +91,30 @@ class CustomButton extends StatelessWidget {
         ),
         child: isLoading
             ? SizedBox(
-          width: 20,
-          height: 20,
-          child: CircularProgressIndicator(
-            strokeWidth: 2,
-            valueColor: AlwaysStoppedAnimation<Color>(_getTextColor(context)),
-          ),
-        )
+                width: 20,
+                height: 20,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  valueColor:
+                      AlwaysStoppedAnimation<Color>(_getTextColor(context)),
+                ),
+              )
             : Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (icon != null) ...[
-              icon!,
-              const SizedBox(width: 8),
-            ],
-            Text(
-              text,
-              style: TextStyle(
-                fontWeight: FontWeight.w600,
-                color: _getTextColor(context),
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  if (icon != null) ...[
+                    icon!,
+                    const SizedBox(width: 8),
+                  ],
+                  Text(
+                    text,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      color: _getTextColor(context),
+                    ),
+                  ),
+                ],
               ),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -153,7 +155,8 @@ class CustomTextButton extends StatelessWidget {
           color: color ?? AppColors.surface,
           fontSize: fontSize,
           fontWeight: fontWeight,
-          decoration: underline ? TextDecoration.underline : TextDecoration.none,
+          decoration:
+              underline ? TextDecoration.underline : TextDecoration.none,
         ),
       ),
     );

@@ -16,7 +16,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// It defines the structure of user data and provides
 /// methods to convert between Firebase documents and Dart objects.
 class UserModel {
-
   // -------------------------------------------------------------------
   // Properties
   // -------------------------------------------------------------------
@@ -75,8 +74,7 @@ class UserModel {
   /// This constructor is used when reading user data directly
   /// from the Firestore database.
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
-    final Map<String, dynamic> data =
-    doc.data() as Map<String, dynamic>;
+    final Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
 
     return UserModel(
       id: doc.id,
@@ -101,9 +99,9 @@ class UserModel {
   /// This is useful when data comes from an API,
   /// local cache, or other non-Firestore sources.
   factory UserModel.fromMap(
-      Map<String, dynamic> map,
-      String id,
-      ) {
+    Map<String, dynamic> map,
+    String id,
+  ) {
     return UserModel(
       id: id,
       name: map['name'] ?? '',
@@ -249,9 +247,9 @@ class UserModel {
   @override
   int get hashCode {
     return id.hashCode ^
-    name.hashCode ^
-    email.hashCode ^
-    (phone?.hashCode ?? 0) ^
-    walletBalance.hashCode;
+        name.hashCode ^
+        email.hashCode ^
+        (phone?.hashCode ?? 0) ^
+        walletBalance.hashCode;
   }
 }

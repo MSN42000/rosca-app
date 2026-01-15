@@ -120,7 +120,8 @@ class ContributionModel {
   int? get daysUntilDue {
     if (dueDate == null) return null;
     final now = DateTime.now();
-    final difference = dueDate!.difference(DateTime(now.year, now.month, now.day));
+    final difference =
+        dueDate!.difference(DateTime(now.year, now.month, now.day));
     return difference.inDays;
   }
 }

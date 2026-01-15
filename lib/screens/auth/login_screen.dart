@@ -100,7 +100,8 @@ class _LoginScreenState extends State<LoginScreen> {
               }
 
               try {
-                await _authService.resetPassword(resetEmailController.text.trim());
+                await _authService
+                    .resetPassword(resetEmailController.text.trim());
                 Navigator.pop(context); // <-- Fermeture du dialogue
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
@@ -136,6 +137,8 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: CustomAppBar(
         title: 'Connexion',
         centerTitle: true,
+        backgroundColor: AppColors.primaryLight,
+        leading: SizedBox(),
       ),
       body: SafeArea(
         child: Center(
@@ -151,12 +154,16 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 120,
                     fit: BoxFit.contain,
                   ),
-
-
                   SizedBox(height: AppSpacing.lg),
-                  Text('Bienvenue !', style: TextStyles.h1.copyWith(color: AppColors.primaryDark), textAlign: TextAlign.center),
+                  Text('Bienvenue !',
+                      style: AppTextStyles.displayLarge
+                          .copyWith(color: AppColors.primaryDark),
+                      textAlign: TextAlign.center),
                   SizedBox(height: AppSpacing.sm),
-                  Text('Connectez-vous à votre compte', style: TextStyles.bodyM.copyWith(color: AppColors.textSecondary), textAlign: TextAlign.center),
+                  Text('Connectez-vous à votre compte',
+                      style: AppTextStyles.bodyMedium
+                          .copyWith(color: AppColors.textSecondary),
+                      textAlign: TextAlign.center),
                   SizedBox(height: AppSpacing.xl),
                   TextFormField(
                     controller: emailController,
@@ -164,12 +171,16 @@ class _LoginScreenState extends State<LoginScreen> {
                       labelText: 'Email',
                       hintText: 'exemple@email.com',
                       prefixIcon: Icon(Icons.email, color: AppColors.primary),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusMd)),
+                      border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusMd)),
                     ),
                     keyboardType: TextInputType.emailAddress,
                     validator: (value) {
-                      if (value == null || value.trim().isEmpty) return 'Veuillez entrer votre email';
-                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value.trim())) return 'Email invalide';
+                      if (value == null || value.trim().isEmpty)
+                        return 'Veuillez entrer votre email';
+                      if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$')
+                          .hasMatch(value.trim())) return 'Email invalide';
                       return null;
                     },
                   ),
@@ -181,14 +192,23 @@ class _LoginScreenState extends State<LoginScreen> {
                       labelText: 'Mot de passe',
                       prefixIcon: Icon(Icons.lock, color: AppColors.primary),
                       suffixIcon: IconButton(
-                        icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility, color: AppColors.textSecondary),
-                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                        icon: Icon(
+                            _obscurePassword
+                                ? Icons.visibility_off
+                                : Icons.visibility,
+                            color: AppColors.textSecondary),
+                        onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword),
                       ),
-                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(AppSpacing.radiusMd)),
+                      border: OutlineInputBorder(
+                          borderRadius:
+                              BorderRadius.circular(AppSpacing.radiusMd)),
                     ),
                     validator: (value) {
-                      if (value == null || value.isEmpty) return 'Veuillez entrer votre mot de passe';
-                      if (value.length < 6) return 'Le mot de passe doit contenir au moins 6 caractères';
+                      if (value == null || value.isEmpty)
+                        return 'Veuillez entrer votre mot de passe';
+                      if (value.length < 6)
+                        return 'Le mot de passe doit contenir au moins 6 caractères';
                       return null;
                     },
                   ),
@@ -207,15 +227,19 @@ class _LoginScreenState extends State<LoginScreen> {
                     text: 'Se connecter',
                     onPressed: _isLoading ? () {} : login,
                     isLoading: _isLoading,
-                    padding: EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.xxl),
+                    padding: EdgeInsets.symmetric(
+                        vertical: AppSpacing.md, horizontal: AppSpacing.xxl),
                   ),
                   SizedBox(height: AppSpacing.xl),
                   Row(
                     children: [
                       Expanded(child: Divider(color: AppColors.divider)),
                       Padding(
-                        padding: EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                        child: Text('OU', style: TextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
+                        padding:
+                            EdgeInsets.symmetric(horizontal: AppSpacing.md),
+                        child: Text('OU',
+                            style: AppTextStyles.bodyMedium
+                                .copyWith(color: AppColors.textSecondary)),
                       ),
                       Expanded(child: Divider(color: AppColors.divider)),
                     ],
@@ -224,17 +248,20 @@ class _LoginScreenState extends State<LoginScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text('Pas encore de compte ?', style: TextStyles.bodyM.copyWith(color: AppColors.textSecondary)),
+                      Text('Pas encore de compte ?',
+                          style: AppTextStyles.bodyMedium
+                              .copyWith(color: AppColors.textPrimary)),
                       CustomTextButton(
                         text: 'Inscrivez-vous',
                         onPressed: _isLoading
                             ? () {}
                             : () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(builder: (_) => RegisterScreen()),
-                          );
-                        },
+                                Navigator.pushReplacement(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (_) => RegisterScreen()),
+                                );
+                              },
                         fontWeight: FontWeight.bold,
                         color: AppColors.primary,
                       ),

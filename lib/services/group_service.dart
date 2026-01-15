@@ -3,6 +3,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/group_model.dart';
 import 'package:rosca_app/screens/contributions/my_contributions_screen.dart';
+
 class GroupService {
   final FirebaseFirestore _db = FirebaseFirestore.instance;
 
@@ -117,7 +118,8 @@ class GroupService {
     final group = await getGroup(groupId);
     if (group == null) return;
 
-    final updatedMembers = group.members.where((m) => m.userId != userId).toList();
+    final updatedMembers =
+        group.members.where((m) => m.userId != userId).toList();
 
     await _db.collection('groups').doc(groupId).update({
       'members': updatedMembers.map((m) => m.toMap()).toList(),
@@ -169,7 +171,7 @@ class GroupService {
         .where('createdBy', isEqualTo: userId)
         .snapshots()
         .map((snapshot) =>
-        snapshot.docs.map((doc) => GroupModel.fromFirestore(doc)).toList());
+            snapshot.docs.map((doc) => GroupModel.fromFirestore(doc)).toList());
   }
 
   /// Récupérer tous les groupes actifs

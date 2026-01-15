@@ -69,7 +69,8 @@ class ContributionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('MMM dd, yyyy');
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat =
+        NumberFormat.currency(symbol: '\$', decimalDigits: 2);
 
     return Card(
       margin: const EdgeInsets.only(bottom: AppSpacing.sm),
@@ -98,14 +99,20 @@ class ContributionTile extends StatelessWidget {
                     children: [
                       Text(
                         contribution.groupName,
-                        style: TextStyles.titleMedium.copyWith(
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w500,
+                          height: 1.4,
                           color: AppColors.primary,
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         'Round ${contribution.roundNumber}',
-                        style: TextStyles.bodySmall.copyWith(
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          height: 1.5,
                           color: AppColors.textSecondary,
                         ),
                       ),
@@ -135,9 +142,10 @@ class ContributionTile extends StatelessWidget {
                         const SizedBox(width: AppSpacing.xs),
                         Text(
                           _getStatusText(),
-                          style: TextStyles.labelMedium.copyWith(
+                          style: TextStyle(
                             color: _getStatusColor(),
                             fontWeight: FontWeight.w600,
+                            fontSize: 12,
                           ),
                         ),
                       ],
@@ -157,14 +165,19 @@ class ContributionTile extends StatelessWidget {
                     children: [
                       Text(
                         'Amount',
-                        style: TextStyles.bodySmall.copyWith(
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          height: 1.5,
                           color: AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: AppSpacing.xs),
                       Text(
                         currencyFormat.format(contribution.amount),
-                        style: TextStyles.amountM.copyWith(
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w600,
                           color: AppColors.primary,
                         ),
                       ),
@@ -176,15 +189,20 @@ class ContributionTile extends StatelessWidget {
                       children: [
                         Text(
                           'Due Date',
-                          style: TextStyles.bodySmall.copyWith(
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            height: 1.5,
                             color: AppColors.textSecondary,
                           ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
                         Text(
                           dateFormat.format(contribution.dueDate!),
-                          style: TextStyles.bodyM.copyWith(
+                          style: TextStyle(
+                            fontSize: 14,
                             fontWeight: FontWeight.w500,
+                            height: 1.5,
                             color: contribution.isOverdue
                                 ? AppColors.error
                                 : AppColors.textPrimary,
@@ -219,8 +237,10 @@ class ContributionTile extends StatelessWidget {
                       Expanded(
                         child: Text(
                           'Payment is overdue',
-                          style: TextStyles.bodySmall.copyWith(
+                          style: TextStyle(
+                            fontSize: 12,
                             color: AppColors.error,
+                            height: 1.5,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -242,16 +262,18 @@ class ContributionTile extends StatelessWidget {
                           context: context,
                           text: 'Pay Now',
                           color: AppColors.primary,
-                          onPressed: (){},
+                          onPressed: () {},
                         ),
                       ),
-                    if (contribution.isPaid && onApprovePressed != null && isAdmin)
+                    if (contribution.isPaid &&
+                        onApprovePressed != null &&
+                        isAdmin)
                       Expanded(
                         child: _buildActionButton(
                           context: context,
                           text: 'Approve',
                           color: AppColors.success,
-                          onPressed: (){},
+                          onPressed: () {},
                         ),
                       ),
                   ],
@@ -285,7 +307,7 @@ class ContributionTile extends StatelessWidget {
         ),
         child: Text(
           text,
-          style: TextStyles.label.copyWith(
+          style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
           ),

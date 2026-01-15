@@ -109,14 +109,15 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                         icon: Icons.calculate,
                         label: 'Total par round',
                         value:
-                        '${group.totalAmountPerRound.toStringAsFixed(2)} MAD',
+                            '${group.totalAmountPerRound.toStringAsFixed(2)} MAD',
                       ),
                       _buildInfoCard(
                         icon: Icons.circle,
                         label: 'Statut',
                         value: group.status == 'active' ? 'Actif' : 'Terminé',
-                        valueColor:
-                        group.status == 'active' ? Colors.green : Colors.grey,
+                        valueColor: group.status == 'active'
+                            ? Colors.green
+                            : Colors.grey,
                       ),
                       SizedBox(height: 20),
 
@@ -355,7 +356,9 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
   void _createRoundContributions(GroupModel group) async {
     if (group.members.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Ajoutez des membres avant de créer les contributions')),
+        SnackBar(
+            content:
+                Text('Ajoutez des membres avant de créer les contributions')),
       );
       return;
     }
@@ -364,15 +367,16 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
       final memberIds = group.members.map((m) => m.userId).toList();
 //
       //await _contributionService.createRoundContributionsForGroup(
-        groupId: //group.id,
-        memberIds: //memberIds,
-        amount: //group.monthlyAmount,
-        roundNumber:// group.currentRound,
+      groupId: //group.id,
+      memberIds: //memberIds,
+      amount: //group.monthlyAmount,
+      roundNumber: // group.currentRound,
       //);
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('✅ ${memberIds.length} contributions créées pour le round ${group.currentRound}'),
+          content: Text(
+              '✅ ${memberIds.length} contributions créées pour le round ${group.currentRound}'),
         ),
       );
     } catch (e) {

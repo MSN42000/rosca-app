@@ -196,8 +196,7 @@ class ContributionService {
         .where('groupId', isEqualTo: groupId)
         .orderBy('roundNumber', descending: true)
         .snapshots()
-        .map((snapshot) =>
-        snapshot.docs
+        .map((snapshot) => snapshot.docs
             .map((doc) => ContributionModel.fromFirestore(doc))
             .toList());
   }
@@ -240,8 +239,7 @@ class ContributionService {
         .where('groupId', isEqualTo: groupId)
         .where('status', isEqualTo: 'paid')
         .snapshots()
-        .map((snapshot) =>
-        snapshot.docs
+        .map((snapshot) => snapshot.docs
             .map((doc) => ContributionModel.fromFirestore(doc))
             .toList());
   }

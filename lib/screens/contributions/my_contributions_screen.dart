@@ -236,7 +236,8 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                         decoration: BoxDecoration(
                           color: Colors.red.withOpacity(0.1),
                           borderRadius: BorderRadius.circular(8),
-                          border: Border.all(color: Colors.red.withOpacity(0.3)),
+                          border:
+                              Border.all(color: Colors.red.withOpacity(0.3)),
                         ),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -288,32 +289,33 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
               Expanded(
                 child: contributions.isEmpty
                     ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.inbox, size: 80, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text(
-                        'Aucune contribution ${_getFilterLabel(_selectedFilter).toLowerCase()}',
-                        style: TextStyle(fontSize: 16, color: Colors.grey),
-                      ),
-                    ],
-                  ),
-                )
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.inbox, size: 80, color: Colors.grey),
+                            SizedBox(height: 16),
+                            Text(
+                              'Aucune contribution ${_getFilterLabel(_selectedFilter).toLowerCase()}',
+                              style:
+                                  TextStyle(fontSize: 16, color: Colors.grey),
+                            ),
+                          ],
+                        ),
+                      )
                     : ListView.builder(
-                  padding: EdgeInsets.all(16),
-                  itemCount: contributions.length,
-                  itemBuilder: (context, index) {
-                    final contribution = contributions[index];
-                    return ContributionTile(
-                      contribution: contribution,
-                      onTap: () => _showContributionDetails(contribution),
-                      onPayPressed: contribution.isPending
-                          ? () => _handlePayContribution(contribution)
-                          : null,
-                    );
-                  },
-                ),
+                        padding: EdgeInsets.all(16),
+                        itemCount: contributions.length,
+                        itemBuilder: (context, index) {
+                          final contribution = contributions[index];
+                          return ContributionTile(
+                            contribution: contribution,
+                            onTap: () => _showContributionDetails(contribution),
+                            onPayPressed: contribution.isPending
+                                ? () => _handlePayContribution(contribution)
+                                : null,
+                          );
+                        },
+                      ),
               ),
             ],
           );
@@ -359,7 +361,8 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
         ),
         child: Column(
           children: [
-            Icon(icon, color: color ?? Theme.of(context).primaryColor, size: 28),
+            Icon(icon,
+                color: color ?? Theme.of(context).primaryColor, size: 28),
             SizedBox(height: 8),
             Text(
               value,

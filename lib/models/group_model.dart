@@ -104,8 +104,9 @@ class GroupModel {
       createdBy: data['createdBy'] ?? '',
       status: data['status'] ?? 'active',
       members: (data['members'] as List<dynamic>?)
-          ?.map((m) => GroupMember.fromMap(m as Map<String, dynamic>))
-          .toList() ?? [],
+              ?.map((m) => GroupMember.fromMap(m as Map<String, dynamic>))
+              .toList() ??
+          [],
       createdAt: data['createdAt'] != null
           ? (data['createdAt'] as Timestamp).toDate()
           : null,

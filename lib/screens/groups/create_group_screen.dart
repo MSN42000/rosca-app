@@ -188,19 +188,19 @@ class _CreateGroupScreenState extends State<CreateGroupScreen> {
                 ),
                 child: _isLoading
                     ? SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2,
-                    valueColor:
-                    AlwaysStoppedAnimation<Color>(Colors.white),
-                  ),
-                )
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
                     : Text(
-                  'Créer le groupe',
-                  style: TextStyle(
-                      fontSize: 16, fontWeight: FontWeight.bold),
-                ),
+                        'Créer le groupe',
+                        style: TextStyle(
+                            fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
               ),
             ],
           ),
