@@ -20,6 +20,8 @@ class ContributionService {
     required int roundNumber,
     DateTime? dueDate,
   }) async {
+    print('📝 Creating contribution: userId=$userId, userName=$userName, groupId=$groupId, amount=$amount');
+
     final docRef = await _db.collection('contributions').add({
       'userId': userId,
       'userName': userName,
@@ -33,6 +35,8 @@ class ContributionService {
       'approvedBy': null,
       'approvedAt': null,
     });
+
+    print('✅ Contribution created with ID: ${docRef.id}');
     return docRef.id;
   }
 
@@ -291,6 +295,7 @@ class ContributionService {
   }
 
   /// Créer des contributions pour tous les membres d'un groupe
+  /// MÉTHODE CORRIGÉE - Crée maintenant correctement le champ userId
   Future<void> createRoundContributionsForGroup({
     required String groupId,
     required String groupName,
@@ -299,13 +304,19 @@ class ContributionService {
     required int roundNumber,
     DateTime? dueDate,
   }) async {
-    final batch = _db.batch();
+    print('🚀 Creating ${memberIdsAndNames.length} contributions for group $groupName (round $roundNumber)');
 
-    memberIdsAndNames.forEach((memberId, memberName) {
+    final batch = _db.batch();
+    int count = 0;
+
+    // CORRECTION: Utiliser entries pour avoir accès à la clé ET la valeur
+    memberIdsAndNames.forEach((userId, userName) {
       final docRef = _db.collection('contributions').doc();
-      batch.set(docRef, {
-        'userId': memberId,
-        'userName': memberName,
+
+      // IMPORTANT: S'assurer que userId est bien défini
+      final contributionData = {
+        'userId': userId,  // ✅ Clé du Map
+        'userName': userName,  // ✅ Valeur du Map
         'groupId': groupId,
         'groupName': groupName,
         'amount': amount,
@@ -315,10 +326,15 @@ class ContributionService {
         'dueDate': dueDate != null ? Timestamp.fromDate(dueDate) : null,
         'approvedBy': null,
         'approvedAt': null,
-      });
+      };
+
+      print('  📄 Creating contribution for: userId=$userId, userName=$userName');
+      batch.set(docRef, contributionData);
+      count++;
     });
 
     await batch.commit();
+    print('✅ Successfully created $count contributions');
   }
 
   /// Récupérer le nombre total de contributions
@@ -331,5 +347,42 @@ class ContributionService {
   Future<List<ContributionModel>> getOverdueContributions(String userId) async {
     final contributions = await getUserContributions(userId);
     return contributions.where((c) => c.isOverdue).toList();
+  }
+
+  /// MÉTHODE DE DÉBOGAGE - Afficher toutes les contributions
+  Future<void> debugPrintAllContributions() async {
+    print('🔍 === DEBUG: Toutes les contributions ===');
+    final snapshot = await _db.collection('contributions').get();
+    print('Total: ${snapshot.docs.length} contributions');
+
+    for (var doc in snapshot.docs) {
+      final data = doc.data();
+      print('  ID: ${doc.id}');
+      print('  userId: ${data['userId']}');
+      print('  userName: ${data['userName']}');
+      print('  groupId: ${data['groupId']}');
+      print('  groupName: ${data['groupName']}');
+      print('  amount: ${data['amount']}');
+      print('  status: ${data['status']}');
+      print('  ---');
+    }
+  }
+
+  /// MÉTHODE DE CORRECTION - Ajouter le champ userId aux contributions existantes
+  Future<void> fixMissingUserIds(Map<String, String> contributionIdToUserId) async {
+    print('🔧 Fixing missing userId fields...');
+
+    final batch = _db.batch();
+    int count = 0;
+
+    contributionIdToUserId.forEach((contributionId, userId) {
+      final docRef = _db.collection('contributions').doc(contributionId);
+      batch.update(docRef, {'userId': userId});
+      count++;
+      print('  ✏️ Setting userId=$userId for contribution $contributionId');
+    });
+
+    await batch.commit();
+    print('✅ Fixed $count contributions');
   }
 }
