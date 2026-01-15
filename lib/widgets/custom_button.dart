@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rosca_app/theme/app_spacing.dart';
+import 'package:rosca_app/theme/app_theme.dart';
 
 enum ButtonType { primary, secondary, outline, danger }
 
@@ -30,13 +31,13 @@ class CustomButton extends StatelessWidget {
   Color _getBackgroundColor(BuildContext context) {
     switch (type) {
       case ButtonType.primary:
-        return Theme.of(context).colorScheme.primary;
+        return AppColors.primary;
       case ButtonType.secondary:
-        return Theme.of(context).colorScheme.secondary;
+        return AppColors.secondary;
       case ButtonType.outline:
         return Colors.transparent;
       case ButtonType.danger:
-        return Theme.of(context).colorScheme.error;
+        return AppColors.error;
     }
   }
 
@@ -45,18 +46,18 @@ class CustomButton extends StatelessWidget {
       case ButtonType.primary:
       case ButtonType.secondary:
       case ButtonType.danger:
-        return Theme.of(context).colorScheme.onPrimary;
+        return AppColors.textSecondary;
       case ButtonType.outline:
-        return Theme.of(context).colorScheme.primary;
+        return AppColors.textSecondary;
     }
   }
 
   Color _getBorderColor(BuildContext context) {
     switch (type) {
       case ButtonType.outline:
-        return Theme.of(context).colorScheme.primary;
+        return AppColors.primary;
       case ButtonType.danger:
-        return Theme.of(context).colorScheme.error;
+        return AppColors.error;
       default:
         return Colors.transparent;
     }
@@ -83,7 +84,7 @@ class CustomButton extends StatelessWidget {
           ),
           elevation: 0,
           shadowColor: Colors.transparent,
-          textStyle: Theme.of(context).textTheme.labelLarge?.copyWith(
+          textStyle: TextStyle(
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -105,7 +106,7 @@ class CustomButton extends StatelessWidget {
             ],
             Text(
               text,
-              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: _getTextColor(context),
               ),
@@ -148,8 +149,8 @@ class CustomTextButton extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: color ?? Theme.of(context).colorScheme.primary,
+        style: TextStyle(
+          color: color ?? AppColors.surface,
           fontSize: fontSize,
           fontWeight: fontWeight,
           decoration: underline ? TextDecoration.underline : TextDecoration.none,
@@ -159,56 +160,56 @@ class CustomTextButton extends StatelessWidget {
   }
 }
 
-class CustomIconButton extends StatelessWidget {
-  final VoidCallback onPressed;
-  final IconData icon;
-  final Color? backgroundColor;
-  final Color? iconColor;
-  final double size;
-  final double iconSize;
-  final bool isOutlined;
+// class CustomIconButton extends StatelessWidget {
+//   final VoidCallback onPressed;
+//   final IconData icon;
+//   final Color? backgroundColor;
+//   final Color? iconColor;
+//   final double size;
+//   final double iconSize;
+//   final bool isOutlined;
 
-  const CustomIconButton({
-    Key? key,
-    required this.onPressed,
-    required this.icon,
-    this.backgroundColor,
-    this.iconColor,
-    this.size = 40,
-    this.iconSize = 20,
-    this.isOutlined = false,
-  }) : super(key: key);
+//   const CustomIconButton({
+//     Key? key,
+//     required this.onPressed,
+//     required this.icon,
+//     this.backgroundColor,
+//     this.iconColor,
+//     this.size = 40,
+//     this.iconSize = 20,
+//     this.isOutlined = false,
+//   }) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: size,
-      height: size,
-      decoration: isOutlined
-          ? BoxDecoration(
-        border: Border.all(
-          color: backgroundColor ?? Theme.of(context).colorScheme.primary,
-          width: 1.5,
-        ),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      )
-          : BoxDecoration(
-        color: backgroundColor ?? Theme.of(context).colorScheme.primary,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-      ),
-      child: IconButton(
-        onPressed: onPressed,
-        icon: Icon(
-          icon,
-          size: iconSize,
-          color: iconColor ??
-              (isOutlined
-                  ? backgroundColor ?? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.onPrimary),
-        ),
-        padding: EdgeInsets.zero,
-        splashRadius: size / 2,
-      ),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       width: size,
+//       height: size,
+//       decoration: isOutlined
+//           ? BoxDecoration(
+//         border: Border.all(
+//           color: backgroundColor ?? Theme.of(context).colorScheme.primary,
+//           width: 1.5,
+//         ),
+//         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+//       )
+//           : BoxDecoration(
+//         color: backgroundColor ?? Theme.of(context).colorScheme.primary,
+//         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+//       ),
+//       child: IconButton(
+//         onPressed: onPressed,
+//         icon: Icon(
+//           icon,
+//           size: iconSize,
+//           color: iconColor ??
+//               (isOutlined
+//                   ? backgroundColor ?? Theme.of(context).colorScheme.primary
+//                   : Theme.of(context).colorScheme.onPrimary),
+//         ),
+//         padding: EdgeInsets.zero,
+//         splashRadius: size / 2,
+//       ),
+//     );
+//   }
+// }

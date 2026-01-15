@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // ============================================
-  // 1. COULEURS PRINCIPALES (Votre marque verte)
+  // 1. COULEURS PRINCIPALES - INDIGO
   // ============================================
-  static const Color primary = Color(0xFF2E7D32);      // Vert principal
-  static const Color primaryLight = Color(0xFF4CAF50); // Vert clair
-  static const Color primaryDark = Color(0xFF1B5E20);  // Vert foncé
+  static const Color primary = Color(0xFF3949AB);      // Indigo principal
+  static const Color primaryLight = Color(0xFF5C6BC0); // Indigo clair
+  static const Color primaryDark = Color(0xFF283593);  // Indigo foncé
 
   // ============================================
-  // 2. COULEURS SECONDAIRES (Accent)
+  // 2. COULEURS SECONDAIRES (Accent) - TEAL
   // ============================================
-  static const Color secondary = Color(0xFFFFA726);    // Orange
-  static const Color secondaryLight = Color(0xFFFFCC80); // Orange clair
-  static const Color secondaryDark = Color(0xFFF57C00);  // Orange foncé
-
+  static const Color secondary = Color(0xFF009688);    // Teal
+  static const Color secondaryLight = Color(0xFF4DB6AC); // Teal clair
+  static const Color secondaryDark = Color(0xFF00695C);  // Teal foncé
+  
   // ============================================
   // 3. COULEURS DE STATUT
   // ============================================
@@ -34,7 +34,7 @@ class AppColors {
   // 5. COULEURS DE TEXTE
   // ============================================
   static const Color textPrimary = Color(0xFF212121);  // Noir (texte principal)
-  static const Color textSecondary = Color(0xFF757575); // Gris (texte secondaire)
+  static const Color textSecondary = Color(0xFFFFFFFF); // Blanc (texte secondaire)
   static const Color textDisabled = Color(0xFF9E9E9E); // Gris clair (texte désactivé)
 
   // ============================================
