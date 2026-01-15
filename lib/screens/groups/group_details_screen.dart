@@ -259,35 +259,66 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     );
   }
 
+  /// ✅ MÉTHODE CORRIGÉE - Utilise automatiquement l'userId de l'utilisateur connecté
   void _showAddMemberDialog(GroupModel group) {
     final nameController = TextEditingController();
     final emailController = TextEditingController();
-    final userIdController = TextEditingController();
 
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Ajouter un membre'),
+        title: Text('Rejoindre le groupe'),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              TextField(
-                controller: userIdController,
-                decoration: InputDecoration(
-                  labelText: 'ID Utilisateur',
-                  hintText: 'Entrez l\'ID Firebase de l\'utilisateur',
+              // Info box
+              Container(
+                padding: EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.blue.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: Colors.blue.withOpacity(0.3)),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.info_outline, color: Colors.blue, size: 20),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        'Vous rejoignez ce groupe',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.blue[700],
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 16),
               TextField(
                 controller: nameController,
-                decoration: InputDecoration(labelText: 'Nom'),
+                decoration: InputDecoration(
+                  labelText: 'Nom',
+                  hintText: 'Entrez votre nom',
+                  prefixIcon: Icon(Icons.person),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
               ),
-              SizedBox(height: 10),
+              SizedBox(height: 16),
               TextField(
                 controller: emailController,
-                decoration: InputDecoration(labelText: 'Email'),
+                decoration: InputDecoration(
+                  labelText: 'Email',
+                  hintText: 'Entrez votre email',
+                  prefixIcon: Icon(Icons.email),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                ),
                 keyboardType: TextInputType.emailAddress,
               ),
             ],
@@ -300,33 +331,58 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           ),
           ElevatedButton(
             onPressed: () async {
-              if (userIdController.text.trim().isEmpty ||
-                  nameController.text.trim().isEmpty ||
+              if (nameController.text.trim().isEmpty ||
                   emailController.text.trim().isEmpty) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Veuillez remplir tous les champs')),
+                  SnackBar(
+                    content: Text('Veuillez remplir tous les champs'),
+                    backgroundColor: Colors.orange,
+                  ),
                 );
                 return;
               }
 
+              // ✅ Récupérer l'userId de l'utilisateur connecté
+              final currentUserId = _authService.currentUserId;
+
+              if (currentUserId == null || currentUserId.isEmpty) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text('Vous devez être connecté'),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+                return;
+              }
+
+              print('📝 Ajout membre: userId=$currentUserId');
+
               try {
+                // ✅ Utiliser automatiquement l'userId de l'utilisateur connecté
                 await _groupService.addMember(
                   groupId: group.id,
-                  userId: userIdController.text.trim(),
+                  userId: currentUserId, // ✅ UserId automatique !
                   name: nameController.text.trim(),
                   email: emailController.text.trim(),
                 );
+
                 Navigator.pop(context);
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Membre ajouté avec succès !')),
+                  SnackBar(
+                    content: Text('✅ Vous avez rejoint le groupe !'),
+                    backgroundColor: Colors.green,
+                  ),
                 );
               } catch (e) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('Erreur: $e')),
+                  SnackBar(
+                    content: Text('Erreur: $e'),
+                    backgroundColor: Colors.red,
+                  ),
                 );
               }
             },
-            child: Text('Ajouter'),
+            child: Text('Rejoindre'),
           ),
         ],
       ),
@@ -357,31 +413,41 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
     if (group.members.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-            content:
-                Text('Ajoutez des membres avant de créer les contributions')),
+          content: Text('Ajoutez des membres avant de créer les contributions'),
+        ),
       );
       return;
     }
 
     try {
-      final memberIds = group.members.map((m) => m.userId).toList();
-//
-      //await _contributionService.createRoundContributionsForGroup(
-      groupId: //group.id,
-      memberIds: //memberIds,
-      amount: //group.monthlyAmount,
-      roundNumber: // group.currentRound,
-      //);
+      final memberIdsAndNames = <String, String>{};
+
+      for (var member in group.members) {
+        memberIdsAndNames[member.userId] = member.name;
+        print('👤 Membre: userId=${member.userId}, name=${member.name}');
+      }
+
+      await _contributionService.createRoundContributionsForGroup(
+        groupId: group.id,
+        groupName: group.name,
+        memberIdsAndNames: memberIdsAndNames,
+        amount: group.monthlyAmount,
+        roundNumber: group.currentRound,
+        dueDate: null,
+      );
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-              '✅ ${memberIds.length} contributions créées pour le round ${group.currentRound}'),
+          content: Text('✅ ${memberIdsAndNames.length} contributions créées'),
+          backgroundColor: Colors.green,
         ),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: $e')),
+        SnackBar(
+          content: Text('Erreur: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }

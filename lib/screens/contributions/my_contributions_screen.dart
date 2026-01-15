@@ -21,11 +21,41 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
   String _selectedFilter = 'all'; // all, pending, paid, approved, rejected
 
   @override
+  void initState() {
+    super.initState();
+    _debugLoadContributions();
+  }
+
+  // Méthode de débogage pour vérifier les données
+  void _debugLoadContributions() async {
+    final currentUserId = _authService.currentUserId;
+    if (currentUserId != null) {
+      print('🔍 DEBUG: UserId = $currentUserId');
+      try {
+        final contributions = await _contributionService.getUserContributions(currentUserId);
+        print('🔍 DEBUG: Nombre de contributions trouvées: ${contributions.length}');
+        for (var contrib in contributions) {
+          print('🔍 DEBUG: Contribution - ID: ${contrib.id}, Amount: ${contrib.amount}, Status: ${contrib.status}');
+        }
+      } catch (e) {
+        print('❌ DEBUG: Erreur lors du chargement: $e');
+      }
+    } else {
+      print('❌ DEBUG: UserId est null');
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     final currentUserId = _authService.currentUserId;
 
-    if (currentUserId == null) {
+    print('🔄 BUILD: currentUserId = $currentUserId');
+
+    if (currentUserId == null || currentUserId.isEmpty) {
       return Scaffold(
+        appBar: AppBar(
+          title: Text('Mes contributions'),
+        ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -35,6 +65,14 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
               Text(
                 'Vous devez être connecté',
                 style: TextStyle(fontSize: 18, color: Colors.grey),
+              ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () {
+                  // Retour à l'écran de connexion
+                  Navigator.of(context).pushReplacementNamed('/login');
+                },
+                child: Text('Se connecter'),
               ),
             ],
           ),
@@ -47,6 +85,14 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
         title: Text('Mes contributions'),
         elevation: 0,
         actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            onPressed: () {
+              setState(() {
+                _debugLoadContributions();
+              });
+            },
+          ),
           PopupMenuButton<String>(
             icon: Icon(Icons.filter_list),
             onSelected: (value) {
@@ -112,11 +158,28 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
       body: StreamBuilder<List<ContributionModel>>(
         stream: _contributionService.getUserContributionsStream(currentUserId),
         builder: (context, snapshot) {
+          print('🔄 STREAM: connectionState = ${snapshot.connectionState}');
+          print('🔄 STREAM: hasData = ${snapshot.hasData}');
+          print('🔄 STREAM: hasError = ${snapshot.hasError}');
+          if (snapshot.hasData) {
+            print('🔄 STREAM: data.length = ${snapshot.data!.length}');
+          }
+
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(child: CircularProgressIndicator());
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(),
+                  SizedBox(height: 16),
+                  Text('Chargement des contributions...'),
+                ],
+              ),
+            );
           }
 
           if (snapshot.hasError) {
+            print('❌ STREAM ERROR: ${snapshot.error}');
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -128,17 +191,32 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                     style: TextStyle(fontSize: 18, color: Colors.red),
                   ),
                   SizedBox(height: 8),
-                  Text(
-                    '${snapshot.error}',
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                    textAlign: TextAlign.center,
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 32),
+                    child: Text(
+                      '${snapshot.error}',
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  SizedBox(height: 16),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _debugLoadContributions();
+                      });
+                    },
+                    icon: Icon(Icons.refresh),
+                    label: Text('Réessayer'),
                   ),
                 ],
               ),
             );
           }
 
-          if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          // Vérification si les données sont nulles ou vides
+          if (!snapshot.hasData || snapshot.data == null) {
+            print('⚠️ STREAM: snapshot.data est null');
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -154,6 +232,11 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                     'Vos contributions apparaîtront ici',
                     style: TextStyle(fontSize: 14, color: Colors.grey[400]),
                   ),
+                  SizedBox(height: 16),
+                  Text(
+                    'UserId: $currentUserId',
+                    style: TextStyle(fontSize: 10, color: Colors.grey[300]),
+                  ),
                 ],
               ),
             );
@@ -161,11 +244,48 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
 
           var contributions = snapshot.data!;
 
+          if (contributions.isEmpty) {
+            print('⚠️ STREAM: Liste de contributions vide');
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.receipt_long, size: 80, color: Colors.grey),
+                  SizedBox(height: 16),
+                  Text(
+                    'Aucune contribution trouvée',
+                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                  ),
+                  SizedBox(height: 8),
+                  Text(
+                    'Les contributions de votre groupe apparaîtront ici',
+                    style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+                    textAlign: TextAlign.center,
+                  ),
+                  SizedBox(height: 16),
+                  OutlinedButton.icon(
+                    onPressed: () {
+                      setState(() {
+                        _debugLoadContributions();
+                      });
+                    },
+                    icon: Icon(Icons.refresh),
+                    label: Text('Actualiser'),
+                  ),
+                ],
+              ),
+            );
+          }
+
+          print('✅ STREAM: ${contributions.length} contributions trouvées');
+
           // Filtrer les contributions
+          List<ContributionModel> filteredContributions = contributions;
           if (_selectedFilter != 'all') {
-            contributions = contributions
+            filteredContributions = contributions
                 .where((c) => c.status == _selectedFilter)
                 .toList();
+            print('🔍 FILTER: ${filteredContributions.length} contributions après filtre "$_selectedFilter"');
           }
 
           // Calculer les statistiques
@@ -269,7 +389,7 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                       Icon(Icons.filter_alt, size: 16),
                       SizedBox(width: 8),
                       Text(
-                        'Filtre: ${_getFilterLabel(_selectedFilter)}',
+                        'Filtre: ${_getFilterLabel(_selectedFilter)} (${filteredContributions.length})',
                         style: TextStyle(fontWeight: FontWeight.w500),
                       ),
                       Spacer(),
@@ -287,7 +407,7 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
 
               // Liste des contributions
               Expanded(
-                child: contributions.isEmpty
+                child: filteredContributions.isEmpty
                     ? Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -412,12 +532,13 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
         );
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Contribution marquée comme payée !'),
+            content: Text('✅ Contribution marquée comme payée !'),
             backgroundColor: Colors.green,
             behavior: SnackBarBehavior.floating,
           ),
         );
       } catch (e) {
+        print('❌ ERROR markAsPaid: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur: $e'),
@@ -451,13 +572,20 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                     size: 28,
                   ),
                   SizedBox(width: 12),
-                  Text(
-                    'Détails de la contribution',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                  Expanded(
+                    child: Text(
+                      'Détails de la contribution',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                  IconButton(
+                    icon: Icon(Icons.close),
+                    onPressed: () => Navigator.pop(context),
                   ),
                 ],
               ),
               Divider(height: 24),
+              _buildDetailRow('ID', contribution.id),
               _buildDetailRow('Groupe', contribution.groupName),
               _buildDetailRow('Round', '${contribution.roundNumber}'),
               _buildDetailRow(
@@ -481,6 +609,8 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                   DateFormat('dd/MM/yyyy à HH:mm')
                       .format(contribution.approvedAt!),
                 ),
+              if (contribution.approvedBy != null)
+                _buildDetailRow('Approuvée par', contribution.approvedBy!),
               SizedBox(height: 16),
               if (contribution.isPending)
                 SizedBox(
@@ -524,6 +654,7 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
       padding: EdgeInsets.symmetric(vertical: 8),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
@@ -532,6 +663,7 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
               fontSize: 15,
             ),
           ),
+          SizedBox(width: 16),
           Flexible(
             child: Text(
               value,
