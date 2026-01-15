@@ -4,7 +4,6 @@ import '../../models/group_model.dart';
 import '../../services/group_service.dart';
 import '../../services/contribution_service.dart';
 import '../../services/auth_service.dart';
-import 'package:rosca_app/screens/contributions/my_contributions_screen.dart';
 
 class GroupDetailsScreen extends StatefulWidget {
   final String groupId;
@@ -109,15 +108,14 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
                         icon: Icons.calculate,
                         label: 'Total par round',
                         value:
-                            '${group.totalAmountPerRound.toStringAsFixed(2)} MAD',
+                        '${group.totalAmountPerRound.toStringAsFixed(2)} MAD',
                       ),
                       _buildInfoCard(
                         icon: Icons.circle,
                         label: 'Statut',
                         value: group.status == 'active' ? 'Actif' : 'Terminé',
-                        valueColor: group.status == 'active'
-                            ? Colors.green
-                            : Colors.grey,
+                        valueColor:
+                        group.status == 'active' ? Colors.green : Colors.grey,
                       ),
                       SizedBox(height: 20),
 
@@ -272,31 +270,6 @@ class _GroupDetailsScreenState extends State<GroupDetailsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Info box
-              Container(
-                padding: EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.blue.withOpacity(0.3)),
-                ),
-                child: Row(
-                  children: [
-                    Icon(Icons.info_outline, color: Colors.blue, size: 20),
-                    SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        'Vous rejoignez ce groupe',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.blue[700],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(height: 16),
               TextField(
                 controller: nameController,
                 decoration: InputDecoration(

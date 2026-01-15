@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rosca_app/screens/auth/login_screen.dart';
 import 'package:rosca_app/theme/app_theme.dart';
 import 'package:rosca_app/widgets/custom_appbar.dart';
 import 'groups/create_group_screen.dart';
@@ -37,7 +38,10 @@ class HomeScreen extends StatelessWidget {
             icon: Icon(Icons.logout, color: Colors.white),
             onPressed: () async {
               await _authService.logout();
-              Navigator.pushReplacementNamed(context, '/login');
+              Navigator.pushReplacement(
+                context,
+                MaterialPageRoute(builder: (_) => LoginScreen()),
+              );
             },
           ),
         ],
