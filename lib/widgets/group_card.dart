@@ -24,9 +24,9 @@ class GroupCard extends StatelessWidget {
   Color _getStatusColor() {
     switch (group.status) {
       case 'active':
-        return AppColors.primary;
-      case 'completed':
         return AppColors.secondary;
+      case 'completed':
+        return AppColors.info;
       case 'cancelled':
         return AppColors.error;
       default:

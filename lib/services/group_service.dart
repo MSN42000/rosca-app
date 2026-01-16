@@ -155,8 +155,12 @@ class GroupService {
     final group = await getGroup(groupId);
     if (group == null) return;
 
+    final newRound = group.currentRound + 1;
+    final isCompleted = newRound >= group.totalRounds;
+
     await _db.collection('groups').doc(groupId).update({
-      'currentRound': group.currentRound + 1,
+      'currentRound': newRound,
+      if (isCompleted) 'status': 'completed',
     });
   }
 

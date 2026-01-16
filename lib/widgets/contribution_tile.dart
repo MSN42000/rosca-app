@@ -39,13 +39,13 @@ class ContributionTile extends StatelessWidget {
   String _getStatusText() {
     switch (contribution.status) {
       case 'approved':
-        return 'Approved';
+        return 'Apprové';
       case 'paid':
-        return 'Paid';
+        return 'Payé';
       case 'pending':
-        return 'Pending';
+        return 'En attente';
       case 'rejected':
-        return 'Rejected';
+        return 'Rejeté';
       default:
         return contribution.status.capitalize();
     }
@@ -69,249 +69,227 @@ class ContributionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('MMM dd, yyyy');
-    final currencyFormat =
-        NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        side: BorderSide(
-          color: AppColors.border,
-          width: 1,
+    return Container(
+      margin: EdgeInsets.only(bottom: 12),
+      child: Card(
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
-      ),
-      elevation: 0,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header with status
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        contribution.groupName,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w500,
-                          height: 1.4,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        'Round ${contribution.roundNumber}',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          height: 1.5,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                    ],
-                  ),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.sm,
-                      vertical: AppSpacing.xs,
-                    ),
-                    decoration: BoxDecoration(
-                      color: _getStatusColor().withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                      border: Border.all(
-                        color: _getStatusColor().withOpacity(0.3),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          _getStatusIcon(),
-                          size: AppSpacing.iconSm,
-                          color: _getStatusColor(),
-                        ),
-                        const SizedBox(width: AppSpacing.xs),
-                        Text(
-                          _getStatusText(),
-                          style: TextStyle(
-                            color: _getStatusColor(),
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
+        color: AppColors.card,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(12),
+          child: Padding(
+            padding: EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // En-tête avec nom et statut
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            contribution.groupName,
+                            style: AppTextStyles.titleLarge.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
-              const SizedBox(height: AppSpacing.md),
-
-              // Amount and due date
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Amount',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          height: 1.5,
-                          color: AppColors.textSecondary,
-                        ),
+                          SizedBox(height: 4),
+                          Text(
+                            'Round ${contribution.roundNumber}',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: AppColors.textDisabled,
+                            ),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        currencyFormat.format(contribution.amount),
+                    ),
+                    SizedBox(width: 8),
+                    Container(
+                      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _getStatusColor(),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        _getStatusText(),
                         style: TextStyle(
-                          fontSize: 20,
+                          fontSize: 10,
+                          color: AppColors.textSecondary,
                           fontWeight: FontWeight.w600,
-                          color: AppColors.primary,
                         ),
                       ),
-                    ],
-                  ),
-                  if (contribution.dueDate != null)
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.end,
-                      children: [
-                        Text(
-                          'Due Date',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w400,
-                            height: 1.5,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
-                        const SizedBox(height: AppSpacing.xs),
-                        Text(
-                          dateFormat.format(contribution.dueDate!),
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                            height: 1.5,
-                            color: contribution.isOverdue
-                                ? AppColors.error
-                                : AppColors.textPrimary,
-                          ),
-                        ),
-                      ],
                     ),
-                ],
-              ),
-
-              // Overdue warning
-              if (contribution.isOverdue) ...[
-                const SizedBox(height: AppSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.sm),
-                  decoration: BoxDecoration(
-                    color: AppColors.error.withOpacity(0.05),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                    border: Border.all(
-                      color: AppColors.error.withOpacity(0.2),
-                      width: 1,
-                    ),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.warning,
-                        size: AppSpacing.iconSm,
-                        color: AppColors.error,
-                      ),
-                      const SizedBox(width: AppSpacing.sm),
-                      Expanded(
-                        child: Text(
-                          'Payment is overdue',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: AppColors.error,
-                            height: 1.5,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
+                  ],
                 ),
-              ],
+                SizedBox(height: 8),
+                Divider(color: AppColors.divider, height: 1),
+                SizedBox(height: 8),
 
-              // Actions
-              if ((contribution.isPending || contribution.isPaid) &&
-                  (onPayPressed != null || onApprovePressed != null)) ...[
-                const SizedBox(height: AppSpacing.md),
+                // Informations financières
                 Row(
                   children: [
-                    if (contribution.isPending && onPayPressed != null)
-                      Expanded(
-                        child: _buildActionButton(
-                          context: context,
-                          text: 'Pay Now',
-                          color: AppColors.primary,
-                          onPressed: () {},
-                        ),
-                      ),
-                    if (contribution.isPaid &&
-                        onApprovePressed != null &&
-                        isAdmin)
-                      Expanded(
-                        child: _buildActionButton(
-                          context: context,
-                          text: 'Approve',
-                          color: AppColors.success,
-                          onPressed: () {},
-                        ),
+                    _buildInfoItem(
+                      'Amount',
+                      currencyFormat.format(contribution.amount),
+                      Icons.monetization_on_outlined,
+                    ),
+                    SizedBox(width: 16),
+                    if (contribution.dueDate != null)
+                      _buildInfoItem(
+                        'Due Date',
+                        dateFormat.format(contribution.dueDate!),
+                        Icons.calendar_today_outlined,
+                        valueColor: contribution.isOverdue
+                            ? AppColors.error
+                            : AppColors.textPrimary,
                       ),
                   ],
                 ),
+
+                // Overdue warning
+                if (contribution.isOverdue) ...[
+                  SizedBox(height: 8),
+                  Divider(color: AppColors.divider, height: 1),
+                  SizedBox(height: 8),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.warning,
+                        size: 14,
+                        color: AppColors.error,
+                      ),
+                      SizedBox(width: 8),
+                      Text(
+                        'Payment is overdue',
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: AppColors.error,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+
+                // Actions
+                if ((contribution.isPending || contribution.isPaid) &&
+                    (onPayPressed != null || onApprovePressed != null)) ...[
+                  SizedBox(height: 16),
+                  Row(
+                    children: [
+                      if (contribution.isPending && onPayPressed != null)
+                        Expanded(
+                          child: TextButton(
+                            onPressed: onPayPressed,
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              backgroundColor:
+                                  AppColors.primaryLight,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              'Payer',
+                              style: AppTextStyles.buttonMedium.copyWith(
+                                fontWeight: FontWeight.w400,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ),
+                      if (contribution.isPending &&
+                          onPayPressed != null &&
+                          contribution.isPaid &&
+                          onApprovePressed != null &&
+                          isAdmin)
+                        SizedBox(width: 8),
+                      if (contribution.isPaid &&
+                          onApprovePressed != null &&
+                          isAdmin)
+                        Expanded(
+                          child: TextButton(
+                            onPressed: onApprovePressed,
+                            style: TextButton.styleFrom(
+                              foregroundColor: AppColors.success,
+                              backgroundColor:
+                                  AppColors.success.withOpacity(0.1),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              'Approve',
+                              style: AppTextStyles.buttonMedium.copyWith(
+                                color: AppColors.success,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildActionButton({
-    required BuildContext context,
-    required String text,
-    required Color color,
-    required VoidCallback onPressed,
+  Widget _buildInfoItem(
+    String label,
+    String value,
+    IconData icon, {
+    Color? valueColor,
   }) {
-    return SizedBox(
-      height: 36,
-      child: ElevatedButton(
-        onPressed: onPressed,
-        style: ElevatedButton.styleFrom(
-          backgroundColor: color,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+    return Expanded(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: 14,
+                color: AppColors.textDisabled,
+              ),
+              SizedBox(width: 4),
+              Flexible(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: AppColors.textDisabled,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-          elevation: 0,
-        ),
-        child: Text(
-          text,
-          style: TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
+          SizedBox(height: 4),
+          Text(
+            value,
+            style: AppTextStyles.bodyMedium.copyWith(
+              fontWeight: FontWeight.w600,
+              color: valueColor ?? AppColors.textPrimary,
+            ),
+            overflow: TextOverflow.ellipsis,
           ),
-        ),
+        ],
       ),
     );
   }

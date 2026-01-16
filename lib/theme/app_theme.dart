@@ -49,4 +49,5 @@ class AppColors {
   static const Color amber = Color(0xFFFFB300);        // Pour badges admin
   static const Color amberLight = Color(0xFFFFECB3);   // Fond badge admin
   static const Color shadow = Color(0x1A000000);       // Ombre (10% noir)
+  static const Color lavendar = Color(0xFF6B46C1);      // Lavendar
 }

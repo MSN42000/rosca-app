@@ -48,7 +48,7 @@ class CustomButton extends StatelessWidget {
       case ButtonType.danger:
         return AppColors.textSecondary;
       case ButtonType.outline:
-        return AppColors.textSecondary;
+        return AppColors.primary;
     }
   }
 
@@ -152,7 +152,7 @@ class CustomTextButton extends StatelessWidget {
       child: Text(
         text,
         style: TextStyle(
-          color: color ?? AppColors.surface,
+          color: color ?? AppColors.primary,
           fontSize: fontSize,
           fontWeight: fontWeight,
           decoration:

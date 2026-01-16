@@ -1,10 +1,12 @@
-// lib/screens/contributions/my_contributions_screen.dart
-
 import 'package:flutter/material.dart';
 import '../../models/contribution_model.dart';
 import '../../services/contribution_service.dart';
 import '../../services/auth_service.dart';
 import '../../widgets/contribution_tile.dart';
+import '../../widgets/custom_appbar.dart';
+import '../../theme/app_spacing.dart';
+import '../../theme/app_text_style.dart';
+import '../../theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 class MyContributionsScreen extends StatefulWidget {
@@ -23,55 +25,64 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
   @override
   void initState() {
     super.initState();
-    _debugLoadContributions();
+    // _debugLoadContributions();
   }
 
   // Méthode de débogage pour vérifier les données
-  void _debugLoadContributions() async {
-    final currentUserId = _authService.currentUserId;
-    if (currentUserId != null) {
-      print('🔍 DEBUG: UserId = $currentUserId');
-      try {
-        final contributions = await _contributionService.getUserContributions(currentUserId);
-        print('🔍 DEBUG: Nombre de contributions trouvées: ${contributions.length}');
-        for (var contrib in contributions) {
-          print('🔍 DEBUG: Contribution - ID: ${contrib.id}, Amount: ${contrib.amount}, Status: ${contrib.status}');
-        }
-      } catch (e) {
-        print('❌ DEBUG: Erreur lors du chargement: $e');
-      }
-    } else {
-      print('❌ DEBUG: UserId est null');
-    }
-  }
+  // void _debugLoadContributions() async {
+  //   final currentUserId = _authService.currentUserId;
+  //   if (currentUserId != null) {
+  //     print('🔍 DEBUG: UserId = $currentUserId');
+  //     try {
+  //       final contributions = await _contributionService.getUserContributions(currentUserId);
+  //       print('🔍 DEBUG: Nombre de contributions trouvées: ${contributions.length}');
+  //       for (var contrib in contributions) {
+  //         print('🔍 DEBUG: Contribution - ID: ${contrib.id}, Amount: ${contrib.amount}, Status: ${contrib.status}');
+  //       }
+  //     } catch (e) {
+  //       print('❌ DEBUG: Erreur lors du chargement: $e');
+  //     }
+  //   } else {
+  //     print('❌ DEBUG: UserId est null');
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     final currentUserId = _authService.currentUserId;
 
-    print('🔄 BUILD: currentUserId = $currentUserId');
+    // print('🔄 BUILD: currentUserId = $currentUserId');
 
     if (currentUserId == null || currentUserId.isEmpty) {
       return Scaffold(
-        appBar: AppBar(
-          title: Text('Mes contributions'),
+        appBar: CustomAppBar(
+          title: 'Mes contributions',
+          centerTitle: true,
         ),
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.person_off, size: 80, color: Colors.grey),
-              SizedBox(height: 16),
+              Icon(Icons.person_off, size: 80, color: AppColors.textDisabled),
+              SizedBox(height: AppSpacing.md),
               Text(
                 'Vous devez être connecté',
-                style: TextStyle(fontSize: 18, color: Colors.grey),
+                style: AppTextStyles.bodyLarge.copyWith(
+                  color: AppColors.textDisabled,
+                ),
               ),
-              SizedBox(height: 16),
+              SizedBox(height: AppSpacing.md),
               ElevatedButton(
                 onPressed: () {
-                  // Retour à l'écran de connexion
                   Navigator.of(context).pushReplacementNamed('/login');
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                    vertical: AppSpacing.md,
+                  ),
+                ),
                 child: Text('Se connecter'),
               ),
             ],
@@ -81,33 +92,36 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Mes contributions'),
-        elevation: 0,
+      appBar: CustomAppBar(
+        title: 'Mes contributions',
+        centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh),
+            icon: Icon(Icons.refresh, color: Colors.white),
             onPressed: () {
               setState(() {
-                _debugLoadContributions();
+                // _debugLoadContributions();
               });
             },
           ),
           PopupMenuButton<String>(
-            icon: Icon(Icons.filter_list),
+            icon: Icon(Icons.filter_list, color: Colors.white),
             onSelected: (value) {
               setState(() {
                 _selectedFilter = value;
               });
             },
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            ),
             itemBuilder: (context) => [
               PopupMenuItem(
                 value: 'all',
                 child: Row(
                   children: [
-                    Icon(Icons.list, size: 20),
-                    SizedBox(width: 12),
-                    Text('Toutes'),
+                    Icon(Icons.list, size: 20, color: AppColors.primary),
+                    SizedBox(width: AppSpacing.sm),
+                    Text('Toutes', style: AppTextStyles.bodyMedium),
                   ],
                 ),
               ),
@@ -115,9 +129,9 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                 value: 'pending',
                 child: Row(
                   children: [
-                    Icon(Icons.pending, size: 20, color: Colors.orange),
-                    SizedBox(width: 12),
-                    Text('En attente'),
+                    Icon(Icons.pending, size: 20, color: AppColors.warning),
+                    SizedBox(width: AppSpacing.sm),
+                    Text('En attente', style: AppTextStyles.bodyMedium),
                   ],
                 ),
               ),
@@ -125,9 +139,9 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                 value: 'paid',
                 child: Row(
                   children: [
-                    Icon(Icons.payment, size: 20, color: Colors.blue),
-                    SizedBox(width: 12),
-                    Text('Payées'),
+                    Icon(Icons.payment, size: 20, color: AppColors.info),
+                    SizedBox(width: AppSpacing.sm),
+                    Text('Payées', style: AppTextStyles.bodyMedium),
                   ],
                 ),
               ),
@@ -135,9 +149,10 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                 value: 'approved',
                 child: Row(
                   children: [
-                    Icon(Icons.check_circle, size: 20, color: Colors.green),
-                    SizedBox(width: 12),
-                    Text('Approuvées'),
+                    Icon(Icons.check_circle,
+                        size: 20, color: AppColors.success),
+                    SizedBox(width: AppSpacing.sm),
+                    Text('Approuvées', style: AppTextStyles.bodyMedium),
                   ],
                 ),
               ),
@@ -145,9 +160,9 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                 value: 'rejected',
                 child: Row(
                   children: [
-                    Icon(Icons.cancel, size: 20, color: Colors.red),
-                    SizedBox(width: 12),
-                    Text('Rejetées'),
+                    Icon(Icons.cancel, size: 20, color: AppColors.error),
+                    SizedBox(width: AppSpacing.sm),
+                    Text('Rejetées', style: AppTextStyles.bodyMedium),
                   ],
                 ),
               ),
@@ -158,56 +173,68 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
       body: StreamBuilder<List<ContributionModel>>(
         stream: _contributionService.getUserContributionsStream(currentUserId),
         builder: (context, snapshot) {
-          print('🔄 STREAM: connectionState = ${snapshot.connectionState}');
-          print('🔄 STREAM: hasData = ${snapshot.hasData}');
-          print('🔄 STREAM: hasError = ${snapshot.hasError}');
-          if (snapshot.hasData) {
-            print('🔄 STREAM: data.length = ${snapshot.data!.length}');
-          }
+          // print('🔄 STREAM: connectionState = ${snapshot.connectionState}');
+          // print('🔄 STREAM: hasData = ${snapshot.hasData}');
+          // print('🔄 STREAM: hasError = ${snapshot.hasError}');
+          // if (snapshot.hasData) {
+          //   print('🔄 STREAM: data.length = ${snapshot.data!.length}');
+          // }
 
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  CircularProgressIndicator(),
-                  SizedBox(height: 16),
-                  Text('Chargement des contributions...'),
+                  CircularProgressIndicator(color: AppColors.primary),
+                  SizedBox(height: AppSpacing.md),
+                  Text(
+                    'Chargement des contributions...',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
                 ],
               ),
             );
           }
 
           if (snapshot.hasError) {
-            print('❌ STREAM ERROR: ${snapshot.error}');
+            // print('❌ STREAM ERROR: ${snapshot.error}');
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.error_outline, size: 80, color: Colors.red),
-                  SizedBox(height: 16),
+                  Icon(Icons.error_outline, size: 80, color: AppColors.error),
+                  SizedBox(height: AppSpacing.md),
                   Text(
                     'Erreur de chargement',
-                    style: TextStyle(fontSize: 18, color: Colors.red),
+                    style: AppTextStyles.titleMedium.copyWith(
+                      color: AppColors.error,
+                    ),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: AppSpacing.sm),
                   Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 32),
+                    padding: EdgeInsets.symmetric(horizontal: AppSpacing.xl),
                     child: Text(
                       '${snapshot.error}',
-                      style: TextStyle(fontSize: 14, color: Colors.grey),
+                      style: AppTextStyles.bodySmall.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppSpacing.md),
                   ElevatedButton.icon(
                     onPressed: () {
                       setState(() {
-                        _debugLoadContributions();
+                        // _debugLoadContributions();
                       });
                     },
                     icon: Icon(Icons.refresh),
                     label: Text('Réessayer'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                    ),
                   ),
                 ],
               ),
@@ -216,26 +243,26 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
 
           // Vérification si les données sont nulles ou vides
           if (!snapshot.hasData || snapshot.data == null) {
-            print('⚠️ STREAM: snapshot.data est null');
+            // print('⚠️ STREAM: snapshot.data est null');
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.receipt_long, size: 80, color: Colors.grey),
-                  SizedBox(height: 16),
+                  Icon(Icons.receipt_long,
+                      size: 80, color: AppColors.textDisabled),
+                  SizedBox(height: AppSpacing.md),
                   Text(
                     'Aucune contribution',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                    style: AppTextStyles.titleMedium.copyWith(
+                      color: AppColors.textDisabled,
+                    ),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: AppSpacing.sm),
                   Text(
                     'Vos contributions apparaîtront ici',
-                    style: TextStyle(fontSize: 14, color: Colors.grey[400]),
-                  ),
-                  SizedBox(height: 16),
-                  Text(
-                    'UserId: $currentUserId',
-                    style: TextStyle(fontSize: 10, color: Colors.grey[300]),
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textDisabled,
+                    ),
                   ),
                 ],
               ),
@@ -245,39 +272,48 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
           var contributions = snapshot.data!;
 
           if (contributions.isEmpty) {
-            print('⚠️ STREAM: Liste de contributions vide');
+            // print('⚠️ STREAM: Liste de contributions vide');
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.receipt_long, size: 80, color: Colors.grey),
-                  SizedBox(height: 16),
+                  Icon(Icons.receipt_long,
+                      size: 80, color: AppColors.textDisabled),
+                  SizedBox(height: AppSpacing.md),
                   Text(
                     'Aucune contribution trouvée',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
+                    style: AppTextStyles.titleMedium.copyWith(
+                      color: AppColors.textDisabled,
+                    ),
                   ),
-                  SizedBox(height: 8),
+                  SizedBox(height: AppSpacing.sm),
                   Text(
-                    'Les contributions de votre groupe apparaîtront ici',
-                    style: TextStyle(fontSize: 14, color: Colors.grey[400]),
+                    'Les contributions de votre groupe\napparaîtront ici',
+                    style: AppTextStyles.bodyMedium.copyWith(
+                      color: AppColors.textDisabled,
+                    ),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 16),
+                  SizedBox(height: AppSpacing.md),
                   OutlinedButton.icon(
                     onPressed: () {
                       setState(() {
-                        _debugLoadContributions();
+                        // _debugLoadContributions();
                       });
                     },
-                    icon: Icon(Icons.refresh),
+                    icon: Icon(Icons.refresh, color: AppColors.primary),
                     label: Text('Actualiser'),
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: AppColors.primary,
+                      side: BorderSide(color: AppColors.primary),
+                    ),
                   ),
                 ],
               ),
             );
           }
 
-          print('✅ STREAM: ${contributions.length} contributions trouvées');
+          // print('✅ STREAM: ${contributions.length} contributions trouvées');
 
           // Filtrer les contributions
           List<ContributionModel> filteredContributions = contributions;
@@ -285,7 +321,7 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
             filteredContributions = contributions
                 .where((c) => c.status == _selectedFilter)
                 .toList();
-            print('🔍 FILTER: ${filteredContributions.length} contributions après filtre "$_selectedFilter"');
+            // print('🔍 FILTER: ${filteredContributions.length} contributions après filtre "$_selectedFilter"');
           }
 
           // Calculer les statistiques
@@ -297,148 +333,179 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
           final approvedCount = contributions.where((c) => c.isApproved).length;
           final overdueCount = contributions.where((c) => c.isOverdue).length;
 
-          return Column(
-            children: [
-              // Statistiques
-              Container(
-                padding: EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Theme.of(context).primaryColor.withOpacity(0.1),
-                      Theme.of(context).primaryColor.withOpacity(0.05),
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                  ),
-                ),
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildStatCard(
-                          label: 'Total approuvé',
-                          value: '${totalApproved.toStringAsFixed(2)} MAD',
-                          icon: Icons.check_circle,
-                          color: Colors.green,
-                        ),
-                        _buildStatCard(
-                          label: 'Approuvées',
-                          value: '$approvedCount',
-                          icon: Icons.verified,
-                          color: Colors.green,
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 12),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
-                      children: [
-                        _buildStatCard(
-                          label: 'En attente',
-                          value: '$pendingCount',
-                          icon: Icons.pending,
-                          color: Colors.orange,
-                        ),
-                        _buildStatCard(
-                          label: 'Payées',
-                          value: '$paidCount',
-                          icon: Icons.payment,
-                          color: Colors.blue,
-                        ),
-                      ],
-                    ),
-                    if (overdueCount > 0) ...[
-                      SizedBox(height: 12),
-                      Container(
-                        padding: EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: Colors.red.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(8),
-                          border:
-                              Border.all(color: Colors.red.withOpacity(0.3)),
-                        ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.warning, color: Colors.red, size: 20),
-                            SizedBox(width: 8),
-                            Text(
-                              '$overdueCount contribution(s) en retard',
-                              style: TextStyle(
-                                color: Colors.red,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-
-              // Indicateur de filtre actif
-              if (_selectedFilter != 'all')
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-                  color: Theme.of(context).primaryColor.withOpacity(0.1),
-                  child: Row(
+          return filteredContributions.isEmpty
+              ? Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.filter_alt, size: 16),
-                      SizedBox(width: 8),
+                      Icon(Icons.inbox,
+                          size: 80, color: AppColors.textDisabled),
+                      SizedBox(height: AppSpacing.md),
                       Text(
-                        'Filtre: ${_getFilterLabel(_selectedFilter)} (${filteredContributions.length})',
-                        style: TextStyle(fontWeight: FontWeight.w500),
-                      ),
-                      Spacer(),
-                      TextButton(
-                        onPressed: () {
-                          setState(() {
-                            _selectedFilter = 'all';
-                          });
-                        },
-                        child: Text('Tout afficher'),
+                        'Aucune contribution ${_getFilterLabel(_selectedFilter).toLowerCase()}',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: AppColors.textDisabled,
+                        ),
                       ),
                     ],
                   ),
-                ),
-
-              // Liste des contributions
-              Expanded(
-                child: filteredContributions.isEmpty
-                    ? Center(
+                )
+              : CustomScrollView(
+                  slivers: [
+                    // Statistiques - Style uniforme avec group_details
+                    SliverToBoxAdapter(
+                      child: Container(
+                        width: double.infinity,
+                        padding: EdgeInsets.all(AppSpacing.lg),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.primary,
+                              AppColors.primary.withOpacity(0.8),
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                        ),
                         child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            Icon(Icons.inbox, size: 80, color: Colors.grey),
-                            SizedBox(height: 16),
-                            Text(
-                              'Aucune contribution ${_getFilterLabel(_selectedFilter).toLowerCase()}',
-                              style:
-                                  TextStyle(fontSize: 16, color: Colors.grey),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildStatCard(
+                                    label: 'Total approuvé',
+                                    value:
+                                        '${totalApproved.toStringAsFixed(2)} MAD',
+                                    icon: Icons.check_circle,
+                                    color: AppColors.success,
+                                  ),
+                                ),
+                                SizedBox(width: AppSpacing.sm),
+                                Expanded(
+                                  child: _buildStatCard(
+                                    label: 'Approuvées',
+                                    value: '$approvedCount',
+                                    icon: Icons.verified,
+                                    color: AppColors.success,
+                                  ),
+                                ),
+                              ],
                             ),
+                            SizedBox(height: AppSpacing.sm),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: _buildStatCard(
+                                    label: 'En attente',
+                                    value: '$pendingCount',
+                                    icon: Icons.pending,
+                                    color: AppColors.warning,
+                                  ),
+                                ),
+                                SizedBox(width: AppSpacing.sm),
+                                Expanded(
+                                  child: _buildStatCard(
+                                    label: 'Payées',
+                                    value: '$paidCount',
+                                    icon: Icons.payment,
+                                    color: AppColors.info,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if (overdueCount > 0) ...[
+                              SizedBox(height: AppSpacing.sm),
+                              Container(
+                                padding: EdgeInsets.all(AppSpacing.md),
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  borderRadius: BorderRadius.circular(
+                                      AppSpacing.radiusMd),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.warning,
+                                        color: Colors.white, size: 20),
+                                    SizedBox(width: AppSpacing.sm),
+                                    Text(
+                                      '$overdueCount contribution(s) en retard',
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        color: Colors.white,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
                           ],
                         ),
-                      )
-                    : ListView.builder(
-                        padding: EdgeInsets.all(16),
-                        itemCount: contributions.length,
-                        itemBuilder: (context, index) {
-                          final contribution = contributions[index];
-                          return ContributionTile(
-                            contribution: contribution,
-                            onTap: () => _showContributionDetails(contribution),
-                            onPayPressed: contribution.isPending
-                                ? () => _handlePayContribution(contribution)
-                                : null,
-                          );
-                        },
                       ),
-              ),
-            ],
-          );
+                    ),
+
+                    // Indicateur de filtre actif
+                    if (_selectedFilter != 'all')
+                      SliverToBoxAdapter(
+                        child: Container(
+                          padding: EdgeInsets.symmetric(
+                            vertical: AppSpacing.sm,
+                            horizontal: AppSpacing.md,
+                          ),
+                          color: AppColors.primaryLight.withOpacity(0.2),
+                          child: Row(
+                            children: [
+                              Icon(Icons.filter_alt,
+                                  size: 16, color: AppColors.primary),
+                              SizedBox(width: AppSpacing.sm),
+                              Text(
+                                'Filtre: ${_getFilterLabel(_selectedFilter)} (${filteredContributions.length})',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  fontWeight: FontWeight.w500,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              Spacer(),
+                              TextButton(
+                                onPressed: () {
+                                  setState(() {
+                                    _selectedFilter = 'all';
+                                  });
+                                },
+                                child: Text(
+                                  'Tout afficher',
+                                  style: AppTextStyles.bodySmall.copyWith(
+                                    color: AppColors.primary,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+
+                    // Liste des contributions
+                    SliverPadding(
+                      padding: EdgeInsets.all(AppSpacing.md),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final contribution = filteredContributions[index];
+                            return ContributionTile(
+                              contribution: contribution,
+                              onTap: () =>
+                                  _showContributionDetails(contribution),
+                              onPayPressed: contribution.isPending
+                                  ? () => _handlePayContribution(contribution)
+                                  : null,
+                            );
+                          },
+                          childCount: filteredContributions.length,
+                        ),
+                      ),
+                    ),
+                  ],
+                );
         },
       ),
     );
@@ -465,41 +532,32 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
     required IconData icon,
     Color? color,
   }) {
-    return Expanded(
-      child: Container(
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.05),
-              blurRadius: 4,
-              offset: Offset(0, 2),
+    return Container(
+      padding: EdgeInsets.all(AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.card.withOpacity(0.15),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      ),
+      child: Column(
+        children: [
+          Icon(icon, color: AppColors.card, size: 28),
+          SizedBox(height: AppSpacing.sm),
+          Text(
+            value,
+            style: AppTextStyles.titleMedium.copyWith(
+              fontWeight: FontWeight.bold,
+              color: AppColors.card,
             ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Icon(icon,
-                color: color ?? Theme.of(context).primaryColor, size: 28),
-            SizedBox(height: 8),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: color ?? Theme.of(context).primaryColor,
-              ),
+          ),
+          SizedBox(height: AppSpacing.xs),
+          Text(
+            label,
+            style: AppTextStyles.bodySmall.copyWith(
+              color: Colors.white.withOpacity(0.9),
             ),
-            SizedBox(height: 4),
-            Text(
-              label,
-              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
+            textAlign: TextAlign.center,
+          ),
+        ],
       ),
     );
   }
@@ -508,18 +566,64 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Confirmer le paiement'),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        ),
+        title: Text(
+          'Confirmer le paiement',
+          style: AppTextStyles.titleLarge.copyWith(
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
         content: Text(
           'Voulez-vous marquer cette contribution de ${contribution.amount.toStringAsFixed(2)} MAD comme payée ?',
+          style: AppTextStyles.bodyMedium.copyWith(
+            color: AppColors.textPrimary,
+          ),
         ),
         actions: [
-          TextButton(
+          // TextButton(
+          //   onPressed: () => Navigator.pop(context, false),
+          //   style: TextButton.styleFrom(
+          //     // foregroundColor: AppColors.primary,
+          //     backgroundColor: AppColors.primaryLight,
+          //     shape: RoundedRectangleBorder(
+          //       borderRadius: BorderRadius.circular(8),
+          //     ),
+          //   ),
+          //   child: Text(
+          //     'Annuler',
+          //     style: TextStyle(color: AppColors.primary),
+          //   ),
+          // ),
+          OutlinedButton(
             onPressed: () => Navigator.pop(context, false),
+            style: OutlinedButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              side: BorderSide(
+                color: AppColors.primary,
+                width: 1.5,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
             child: Text('Annuler'),
           ),
           ElevatedButton(
             onPressed: () => Navigator.pop(context, true),
-            child: Text('Confirmer'),
+            style: ElevatedButton.styleFrom(
+              foregroundColor: AppColors.primary,
+              backgroundColor: AppColors.primary,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8),
+              ),
+            ),
+            child: Text(
+              'Confirmer',
+              style: TextStyle(color: AppColors.textSecondary),
+            ),
           ),
         ],
       ),
@@ -533,16 +637,16 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('✅ Contribution marquée comme payée !'),
-            backgroundColor: Colors.green,
+            backgroundColor: AppColors.success,
             behavior: SnackBarBehavior.floating,
           ),
         );
       } catch (e) {
-        print('❌ ERROR markAsPaid: $e');
+        // print('❌ ERROR markAsPaid: $e');
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Erreur: $e'),
-            backgroundColor: Colors.red,
+            backgroundColor: AppColors.error,
             behavior: SnackBarBehavior.floating,
           ),
         );
@@ -555,11 +659,13 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
       context: context,
       isScrollControlled: true,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(AppSpacing.radiusLg),
+        ),
       ),
       builder: (context) {
         return Padding(
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.all(AppSpacing.lg),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -568,14 +674,17 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                 children: [
                   Icon(
                     Icons.receipt_long,
-                    color: Theme.of(context).primaryColor,
+                    color: AppColors.primary,
                     size: 28,
                   ),
-                  SizedBox(width: 12),
+                  SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Text(
                       'Détails de la contribution',
-                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      style: AppTextStyles.titleLarge.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
                     ),
                   ),
                   IconButton(
@@ -584,8 +693,8 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                   ),
                 ],
               ),
-              Divider(height: 24),
-              _buildDetailRow('ID', contribution.id),
+              Divider(height: AppSpacing.lg),
+              // _buildDetailRow('ID', contribution.id),
               _buildDetailRow('Groupe', contribution.groupName),
               _buildDetailRow('Round', '${contribution.roundNumber}'),
               _buildDetailRow(
@@ -611,7 +720,7 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                 ),
               if (contribution.approvedBy != null)
                 _buildDetailRow('Approuvée par', contribution.approvedBy!),
-              SizedBox(height: 16),
+              SizedBox(height: AppSpacing.md),
               if (contribution.isPending)
                 SizedBox(
                   width: double.infinity,
@@ -621,9 +730,16 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
                       _handlePayContribution(contribution);
                     },
                     icon: Icon(Icons.payment),
-                    label: Text('Marquer comme payée'),
+                    label: Text(
+                      'Marquer comme payée',
+                    ),
                     style: ElevatedButton.styleFrom(
-                      padding: EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: AppColors.card,
+                      padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
                     ),
                   ),
                 ),
@@ -651,25 +767,24 @@ class _MyContributionsScreenState extends State<MyContributionsScreen> {
 
   Widget _buildDetailRow(String label, String value) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8),
+      padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             label,
-            style: TextStyle(
-              color: Colors.grey[600],
-              fontSize: 15,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: AppColors.primary,
             ),
           ),
-          SizedBox(width: 16),
+          SizedBox(width: AppSpacing.md),
           Flexible(
             child: Text(
               value,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 15,
+              style: AppTextStyles.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
               ),
               textAlign: TextAlign.right,
             ),
