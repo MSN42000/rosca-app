@@ -69,7 +69,7 @@ class ContributionTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final dateFormat = DateFormat('MMM dd, yyyy');
-    final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final currencyFormat = NumberFormat.currency(symbol: 'MAD', decimalDigits: 2);
 
     return Container(
       margin: EdgeInsets.only(bottom: 12),
